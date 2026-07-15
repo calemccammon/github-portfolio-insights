@@ -37,7 +37,7 @@ A static dashboard built with **React + TypeScript + Vite** and **Material UI** 
 
 ## Local Development
 
-**Prerequisites:** [GitHub CLI](https://cli.github.com/) installed and authenticated as `calemccammon`.
+**Prerequisites:** [GitHub CLI](https://cli.github.com/) installed
 
 ```bash
 # Install dependencies
@@ -92,13 +92,4 @@ npm run test:watch  # watch mode
 ```
 
 Tests cover utility functions (`formatTopic`, `aggregateTopics`) and component behaviour (null guards, rendering, chip counts).
-
----
-
-## Deployment Setup (one-time)
-
-1. Create the repository on GitHub as `github-portfolio-insights` under `calemccammon`
-2. Push the code to `main`
-3. Go to **Settings → Pages → Source** and select **GitHub Actions**
-4. Push any commit to trigger the first deploy
 
