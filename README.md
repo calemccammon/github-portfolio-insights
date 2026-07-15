@@ -77,7 +77,7 @@ push to main
   → npm test               (Vitest — must pass before deploy)
   → fetch-github-data.ts   (gh CLI + GitHub Models, GITHUB_TOKEN auto-configured)
   → npm run build
-  → peaceiris/actions-gh-pages → gh-pages branch
+  → actions/upload-pages-artifact + actions/deploy-pages (native GitHub Pages)
 ```
 
 Tests also run on pull requests (without deploying).
@@ -99,6 +99,6 @@ Tests cover utility functions (`formatTopic`, `aggregateTopics`) and component b
 
 1. Create the repository on GitHub as `github-portfolio-insights` under `calemccammon`
 2. Push the code to `main`
-3. Go to **Settings → Pages → Source** and select **Deploy from a branch → gh-pages**
+3. Go to **Settings → Pages → Source** and select **GitHub Actions**
 4. Push any commit to trigger the first deploy
 
