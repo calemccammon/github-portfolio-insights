@@ -25,9 +25,9 @@ function gh(endpoint: string): unknown {
 function getGitHubToken(): string | null {
   // CI: GitHub Actions injects GITHUB_TOKEN automatically
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
-  // Local: use the calemccammon account via gh CLI
+  // Local: use the active gh CLI account
   try {
-    return execSync('gh auth token --user calemccammon', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execSync('gh auth token', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   } catch {
     return null;
   }
