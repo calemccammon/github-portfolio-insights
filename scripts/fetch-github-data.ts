@@ -1,15 +1,19 @@
 #!/usr/bin/env tsx
 /**
  * Fetch GitHub data for calemccammon using the GitHub CLI (`gh api`).
- * Calls GitHub Models (gpt-4o-mini) to generate an AI portfolio narrative.
- * Writes public/data/github-stats.json for the Vite build to bundle.
+ * Calls the Claude API to generate an AI portfolio narrative and per-repo
+ * technology tags. Writes public/data/github-stats.json for Vite to bundle.
  *
- * Local:  requires `gh auth login` as calemccammon
- * CI:     GITHUB_TOKEN is auto-provided by GitHub Actions
+ * Local:  requires `gh auth login` as calemccammon, plus ANTHROPIC_API_KEY
+ * CI:     gh uses GITHUB_TOKEN; ANTHROPIC_API_KEY comes from repo secrets
+ *
+ * Both AI sections degrade to null if the key is absent or the call fails --
+ * the dashboard renders without them rather than failing the build.
  *
  * Usage: npx tsx scripts/fetch-github-data.ts
  */
 
+import Anthropic from '@anthropic-ai/sdk';
 import { execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -18,34 +22,30 @@ import type { GitHubProfile, GitHubRepo, RepoLanguages, GitHubStats } from '../s
 const USERNAME = 'calemccammon';
 
 /**
- * GitHub Models moved off the Azure-hosted endpoint; the old
- * `models.inference.ai.azure.com` host now answers 404, which is why both AI
- * sections silently rendered empty. The GitHub-hosted API also requires the
- * model name to carry its provider prefix -- plain `gpt-4o` is not resolvable.
+ * This previously called GitHub Models, which was retired -- the endpoint now
+ * answers 410 `github_models_retirement_brownout`, so both AI sections had been
+ * silently rendering empty.
  */
-const MODELS_ENDPOINT = 'https://models.github.ai/inference/chat/completions';
-const MODELS_NAME = 'openai/gpt-4o';
+const MODEL = 'claude-opus-5';
+
+const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 
 function gh(endpoint: string): unknown {
   const out = execSync(`gh api "${endpoint}"`, { encoding: 'utf8' });
   return JSON.parse(out);
 }
 
-function getGitHubToken(): string | null {
-  // CI: GitHub Actions injects GITHUB_TOKEN automatically
-  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
-  // Local: use the active gh CLI account
-  try {
-    return execSync('gh auth token', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
-  } catch {
-    return null;
-  }
+/** Turns an SDK error into one readable line, using its typed class. */
+function describe(err: unknown): string {
+  if (err instanceof Anthropic.AuthenticationError) return 'invalid or missing ANTHROPIC_API_KEY';
+  if (err instanceof Anthropic.RateLimitError) return 'rate limited';
+  if (err instanceof Anthropic.APIError) return `API error ${err.status}: ${err.message}`;
+  return (err as Error).message;
 }
 
 async function fetchAINarrative(repos: GitHubRepo[]): Promise<string | null> {
-  const token = getGitHubToken();
-  if (!token) {
-    console.warn('Warning: No GitHub token available -- skipping AI narrative.');
+  if (!anthropic) {
+    console.warn('Warning: ANTHROPIC_API_KEY not set -- skipping AI narrative.');
     return null;
   }
 
@@ -67,44 +67,60 @@ async function fetchAINarrative(repos: GitHubRepo[]): Promise<string | null> {
       `Second: the recurring patterns or repeated technology choices across repos. ` +
       `State facts only. Do not editorialize. No bullet points.`;
 
-    const response = await fetch(MODELS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODELS_NAME,
-        messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 300,
-      }),
+    const response = await anthropic.messages.create({
+      model: MODEL,
+      // Generous, because max_tokens caps thinking plus response text together.
+      max_tokens: 16000,
+      system: systemMessage,
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    if (!response.ok) {
-      const body = await response.text();
-      console.warn(`Warning: GitHub Models call failed (${response.status}): ${body}`);
+    const text = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('')
+      .trim();
+
+    if (!text) {
+      console.warn(`Warning: AI narrative empty (stop_reason: ${response.stop_reason})`);
       return null;
     }
 
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>;
-    };
-
-    const text = data.choices?.[0]?.message?.content?.trim() ?? null;
-    if (text) console.log('AI narrative generated');
+    console.log('AI narrative generated');
     return text;
   } catch (err) {
-    console.warn('Warning: AI narrative skipped:', (err as Error).message);
+    console.warn('Warning: AI narrative skipped:', describe(err));
     return null;
   }
 }
 
-async function fetchAITechTags(repos: GitHubRepo[], token: string | null): Promise<Record<string, string[]> | null> {
-  if (!token) return null;
+/**
+ * The UI wants `{ "repo-name": ["Tag"] }`, but a schema with arbitrary keys
+ * cannot be expressed -- structured outputs require `additionalProperties:
+ * false`. So the model returns a list of named entries and we reshape it here.
+ */
+const TECH_TAGS_SCHEMA = {
+  type: 'object',
+  properties: {
+    repositories: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'The repository name, exactly as given.' },
+          tags: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['name', 'tags'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['repositories'],
+  additionalProperties: false,
+} as const;
+
+async function fetchAITechTags(repos: GitHubRepo[]): Promise<Record<string, string[]> | null> {
+  if (!anthropic) return null;
   try {
     const readmes: string[] = [];
     for (const repo of repos) {
@@ -122,33 +138,39 @@ async function fetchAITechTags(repos: GitHubRepo[], token: string | null): Promi
       `For each repository, extract a list of specific technologies, frameworks, libraries, architectural patterns, and design patterns ` +
       `that are actually mentioned or clearly evident. Be specific (e.g. "Coroutines", "MVVM", "KTables", "Room", "Medallion Architecture") ` +
       `rather than generic (e.g. not "backend", "database"). Omit language names (Java, Kotlin, Python, etc.) -- those are tracked separately. ` +
-      `Return ONLY valid JSON in this exact shape, no markdown, no explanation:\n` +
-      `{"repo-name": ["Tag1", "Tag2"], ...}`;
+      `Include one entry per repository, using its exact name.`;
 
-    const response = await fetch(MODELS_ENDPOINT, {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: MODELS_NAME,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.1,
-        max_tokens: 1500,
-        response_format: { type: 'json_object' },
-      }),
+    const response = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 16000,
+      // Reading twenty READMEs and deciding what counts as a specific,
+      // non-generic technology is worth thinking about.
+      thinking: { type: 'adaptive' },
+      // The schema is enforced server-side, so no parse-and-retry loop.
+      output_config: { format: { type: 'json_schema', schema: TECH_TAGS_SCHEMA } },
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    if (!response.ok) {
-      console.warn(`Warning: GitHub Models tech tags call failed (${response.status})`);
+    const raw = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('');
+
+    if (!raw) {
+      console.warn(`Warning: AI tech tags empty (stop_reason: ${response.stop_reason})`);
       return null;
     }
 
-    const data = (await response.json()) as { choices: Array<{ message: { content: string } }> };
-    const raw = data.choices?.[0]?.message?.content ?? '{}';
-    const parsed = JSON.parse(raw) as Record<string, string[]>;
-    console.log('AI tech tags extracted');
-    return parsed;
+    const parsed = JSON.parse(raw) as { repositories: Array<{ name: string; tags: string[] }> };
+    const byRepo: Record<string, string[]> = {};
+    for (const entry of parsed.repositories) {
+      if (entry.tags.length > 0) byRepo[entry.name] = entry.tags;
+    }
+
+    console.log(`AI tech tags extracted for ${Object.keys(byRepo).length} repos`);
+    return byRepo;
   } catch (err) {
-    console.warn('Warning: AI tech tags skipped:', (err as Error).message);
+    console.warn('Warning: AI tech tags skipped:', describe(err));
     return null;
   }
 }
@@ -173,11 +195,11 @@ for (const repo of ownRepos) {
   }
 }
 
-console.log('Calling GitHub Models for portfolio narrative...');
+console.log('Calling Claude for portfolio narrative...');
 const aiNarrative = await fetchAINarrative(ownRepos);
 
-console.log('Calling GitHub Models for README tech tag extraction...');
-const aiTechTags = await fetchAITechTags(ownRepos, getGitHubToken());
+console.log('Calling Claude for README tech tag extraction...');
+const aiTechTags = await fetchAITechTags(ownRepos);
 
 const stats: GitHubStats = {
   profile,
