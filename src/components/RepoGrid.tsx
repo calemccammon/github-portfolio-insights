@@ -1,6 +1,15 @@
-import { Box, Card, CardActionArea, CardContent, Chip, Grid, Typography } from "@mui/material";
+import {
+  Box, Button, Card, CardActionArea, CardContent, Checkbox, Chip, FormControl, Grid,
+  InputAdornment, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, TextField, Typography,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import type { GitHubRepo } from "../types/github";
 import { languageColor } from "../utils/languages";
+import { formatTopic } from "../utils/topics";
+import {
+  availableLanguages, filterRepos, hasActiveFilters, sortRepos,
+  SORT_KEYS, SORT_LABELS, type RepoFilters, type SortKey,
+} from "../utils/filters";
 
 function timeAgo(dateStr: string): string {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
@@ -67,24 +76,136 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
 
 interface Props {
   repos: GitHubRepo[];
+  aiTechTags: Record<string, string[]> | null;
+  filters: RepoFilters;
+  onSearchChange: (search: string) => void;
+  onSortChange: (sort: SortKey) => void;
+  onLanguagesChange: (languages: string[]) => void;
+  onToggleTopic: (topic: string) => void;
+  onToggleTag: (tag: string) => void;
+  onClearAll: () => void;
 }
 
-export function RepoGrid({ repos }: Props) {
-  const sorted = [...repos].sort((a, b) => new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime());
+export function RepoGrid({
+  repos, aiTechTags, filters, onSearchChange, onSortChange,
+  onLanguagesChange, onToggleTopic, onToggleTag, onClearAll,
+}: Props) {
+  const visible = sortRepos(filterRepos(repos, filters, aiTechTags), filters.sort);
+  const filtered = hasActiveFilters(filters);
+  const languages = availableLanguages(repos);
 
   return (
     <Box sx={{ mb: 4 }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
         Repositories{" "}
-        <Typography component="span" variant="body2" color="text.secondary">({repos.length})</Typography>
+        <Typography component="span" variant="body2" color="text.secondary">
+          ({filtered ? `${visible.length} of ${repos.length}` : repos.length})
+        </Typography>
       </Typography>
-      <Grid container spacing={2}>
-        {sorted.map((repo) => (
-          <Grid key={repo.id} size={{ xs: 12, sm: 6 }}>
-            <RepoCard repo={repo} />
-          </Grid>
-        ))}
-      </Grid>
+
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mb: 2 }}>
+        <TextField
+          size="small"
+          placeholder="Search name or description"
+          value={filters.search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          sx={{ flexGrow: 1, minWidth: 200 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: { "aria-label": "Search repositories" },
+          }}
+        />
+
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel id="language-filter-label">Language</InputLabel>
+          <Select
+            labelId="language-filter-label"
+            multiple
+            value={filters.languages}
+            onChange={(e) =>
+              onLanguagesChange(
+                typeof e.target.value === "string" ? e.target.value.split(",") : e.target.value,
+              )
+            }
+            input={<OutlinedInput label="Language" />}
+            renderValue={(selected) => selected.join(", ")}
+          >
+            {languages.map((lang) => (
+              <MenuItem key={lang} value={lang}>
+                <Checkbox size="small" checked={filters.languages.includes(lang)} />
+                <ListItemText primary={lang} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 170 }}>
+          <InputLabel id="sort-label">Sort</InputLabel>
+          <Select
+            labelId="sort-label"
+            value={filters.sort}
+            label="Sort"
+            onChange={(e) => onSortChange(e.target.value as SortKey)}
+          >
+            {SORT_KEYS.map((key) => (
+              <MenuItem key={key} value={key}>{SORT_LABELS[key]}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {filtered && (
+        <Box
+          role="group"
+          aria-label="Active filters"
+          sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75, mb: 2 }}
+        >
+          <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>Filtering by:</Typography>
+          {filters.topics.map((topic) => (
+            <Chip key={`topic-${topic}`} size="small" color="primary" label={formatTopic(topic)} onDelete={() => onToggleTopic(topic)} />
+          ))}
+          {filters.tags.map((tag) => (
+            <Chip key={`tag-${tag}`} size="small" color="primary" label={tag} onDelete={() => onToggleTag(tag)} />
+          ))}
+          {filters.languages.map((lang) => (
+            <Chip
+              key={`lang-${lang}`}
+              size="small"
+              label={lang}
+              onDelete={() => onLanguagesChange(filters.languages.filter((l) => l !== lang))}
+              sx={{ bgcolor: `${languageColor(lang)}33`, borderColor: languageColor(lang) }}
+              variant="outlined"
+            />
+          ))}
+          {filters.search.trim() && (
+            <Chip size="small" variant="outlined" label={`"${filters.search.trim()}"`} onDelete={() => onSearchChange("")} />
+          )}
+          <Button size="small" onClick={onClearAll} sx={{ textTransform: "none", ml: 0.5 }}>Clear all</Button>
+        </Box>
+      )}
+
+      {visible.length === 0 ? (
+        <Box sx={{ textAlign: "center", py: 6, border: "1px dashed #30363d", borderRadius: 2 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            No repositories match these filters.
+          </Typography>
+          <Button size="small" onClick={onClearAll} sx={{ textTransform: "none" }}>Clear all filters</Button>
+        </Box>
+      ) : (
+        <Grid container spacing={2}>
+          {visible.map((repo) => (
+            <Grid key={repo.id} size={{ xs: 12, sm: 6 }}>
+              <RepoCard repo={repo} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Box>
   );
 }

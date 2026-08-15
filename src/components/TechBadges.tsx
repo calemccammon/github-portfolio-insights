@@ -1,12 +1,15 @@
-import { Box, Chip, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { GitHubRepo } from "../types/github";
 import { formatTopic, aggregateTopics } from "../utils/topics";
+import { FilterChip } from "./FilterChip";
 
 interface Props {
   repos: GitHubRepo[];
+  selected: string[];
+  onToggle: (topic: string) => void;
 }
 
-export function TechBadges({ repos }: Props) {
+export function TechBadges({ repos, selected, onToggle }: Props) {
   const { count: topicCount, repos: topicRepos } = aggregateTopics(repos);
   const sorted = Object.entries(topicCount).sort((a, b) => b[1] - a[1]);
 
@@ -14,36 +17,20 @@ export function TechBadges({ repos }: Props) {
     <Box sx={{ mb: 4 }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>Topics</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        All topics applied across the repos
+        Declared on each repository — select to filter
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        {sorted.map(([topic, count]) => {
-          const label = formatTopic(topic);
-          const repoNames = topicRepos[topic] ?? [];
-          return (
-            <Tooltip
-              key={topic}
-              title={<Box>{repoNames.map((name) => <Box key={name} sx={{ fontSize: 12, py: 0.25 }}>{name}</Box>)}</Box>}
-              arrow
-              placement="top"
-            >
-              <Chip
-                label={count > 1 ? `${label} ×${count}` : label}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: "#30363d",
-                  color: "text.primary",
-                  backgroundColor: count >= 3 ? "#58a6ff22" : "transparent",
-                  fontWeight: count >= 3 ? 600 : 400,
-                  cursor: "default",
-                }}
-              />
-            </Tooltip>
-          );
-        })}
+        {sorted.map(([topic, count]) => (
+          <FilterChip
+            key={topic}
+            label={formatTopic(topic)}
+            count={count}
+            repoNames={topicRepos[topic] ?? []}
+            selected={selected.includes(topic)}
+            onToggle={() => onToggle(topic)}
+          />
+        ))}
       </Box>
     </Box>
   );
 }
-

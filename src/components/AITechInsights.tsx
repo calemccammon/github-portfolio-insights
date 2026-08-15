@@ -1,11 +1,14 @@
-import { Box, Chip, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import PsychologyIcon from "@mui/icons-material/Psychology";
+import { FilterChip } from "./FilterChip";
 
 interface Props {
   aiTechTags: Record<string, string[]> | null;
+  selected: string[];
+  onToggle: (tag: string) => void;
 }
 
-export function AITechInsights({ aiTechTags }: Props) {
+export function AITechInsights({ aiTechTags, selected, onToggle }: Props) {
   if (!aiTechTags || Object.keys(aiTechTags).length === 0) return null;
 
   const tagCount: Record<string, number> = {};
@@ -27,33 +30,19 @@ export function AITechInsights({ aiTechTags }: Props) {
         <Typography variant="h6" sx={{ fontWeight: 600 }}>Patterns &amp; Libraries</Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Identified per repository by Claude
+        Identified per repository by Claude — select to filter
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        {sorted.map(([tag, count]) => {
-          const repoNames = tagRepos[tag] ?? [];
-          return (
-            <Tooltip
-              key={tag}
-              title={<Box>{repoNames.map((name) => <Box key={name} sx={{ fontSize: 12, py: 0.25 }}>{name}</Box>)}</Box>}
-              arrow
-              placement="top"
-            >
-              <Chip
-                label={count > 1 ? `${tag} ×${count}` : tag}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: "#30363d",
-                  color: "text.primary",
-                  backgroundColor: count >= 3 ? "#3fb95022" : "transparent",
-                  fontWeight: count >= 3 ? 600 : 400,
-                  cursor: "default",
-                }}
-              />
-            </Tooltip>
-          );
-        })}
+        {sorted.map(([tag, count]) => (
+          <FilterChip
+            key={tag}
+            label={tag}
+            count={count}
+            repoNames={tagRepos[tag] ?? []}
+            selected={selected.includes(tag)}
+            onToggle={() => onToggle(tag)}
+          />
+        ))}
       </Box>
     </Box>
   );

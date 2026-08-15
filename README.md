@@ -14,9 +14,27 @@ A static dashboard built with **React + TypeScript + Vite** and **Material UI** 
 | **AI Portfolio Analysis** | 2-paragraph narrative written by Claude from repo metadata |
 | **Tech Adoption Timeline** | Bubble chart — when each language first appeared in the portfolio |
 | **Language Distribution** | Doughnut chart — byte counts per language with percentages |
-| **Topics** | All GitHub topics applied across repos, with repo tooltips |
-| **Patterns & Libraries** | Frameworks, patterns, and tools Claude extracted per repository |
-| **Repository Grid** | All non-forked public repos, sorted by last push |
+| **Topics** | GitHub topics declared across repos — click to filter the grid |
+| **Patterns & Libraries** | Frameworks, patterns, and tools Claude extracted per repository — click to filter |
+| **Repository Grid** | All non-forked public repos, with search, language filter, and sort |
+
+---
+
+## Filtering
+
+The three chip sections are controls, not decoration. Selecting chips narrows the
+repository grid, and the active filters are mirrored into the query string, so any
+filtered view can be linked or bookmarked:
+
+```
+?topic=kafka&tag=Dagster&sort=name     → repos with the kafka topic AND the Dagster tag
+?lang=Java                             → the five Java repos
+```
+
+Topics and tags combine with **AND**, so each chip clicked narrows the results. Languages
+combine with **OR**, because a repo has exactly one primary language and ANDing two of
+them could only ever return nothing. Clicking a doughnut slice filters by that language;
+the Language dropdown does the same thing from the keyboard.
 
 ---
 
@@ -26,7 +44,7 @@ A static dashboard built with **React + TypeScript + Vite** and **Material UI** 
 |---|---|
 | Framework | React 19 + TypeScript + Vite |
 | UI | Material UI v9 |
-| Charts | Chart.js + react-chartjs-2 |
+| Charts | Chart.js + react-chartjs-2 (lazy-loaded) |
 | Data fetching | GitHub CLI (`gh api`) |
 | AI commentary | Claude — authored once, committed as `src/data/ai-content.json` |
 | Testing | Vitest + Testing Library |
@@ -103,5 +121,20 @@ npm test          # run once
 npm run test:watch  # watch mode
 ```
 
-Tests cover utility functions (`formatTopic`, `aggregateTopics`) and component behaviour (null guards, rendering, chip counts).
+Tests cover the filter logic (`filterRepos`, `sortRepos`, URL round-tripping), utility
+functions (`formatTopic`, `aggregateTopics`, `languageColor`), and component behaviour
+(null guards, rendering, chip counts, active-filter state).
+
+The AND/OR asymmetry between facets and the stars-tie-broken-by-recency sort are both
+easy to regress and invisible when they break, so each is pinned by a named test.
+
+---
+
+## Language Distribution: two lenses
+
+The doughnut toggles between **bytes of code** and **repositories per primary language**.
+Byte counts reward verbose languages and large generated or vendored files; the
+per-repository count weights every project equally. They disagree, which is the point —
+neither one is the whole picture, and showing only the first would overstate whichever
+language happens to produce the most text.
 
