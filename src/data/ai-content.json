@@ -1,0 +1,154 @@
+{
+  "_comment": "AI-authored, committed content. Written by Claude with the repository list, descriptions, topics and available READMEs in context, then reviewed and committed. Not generated at build time -- see README. Refresh by asking Claude to regenerate this file when the portfolio changes.",
+  "generatedBy": "Claude (Claude Code session)",
+  "generatedAt": "2026-08-15",
+  "narrative": "The repositories cover data engineering, mobile and desktop clients, and web APIs. Pipelines use Airflow, dbt, Dagster, Kafka Streams and Redpanda over PostgreSQL, DuckDB and BigQuery. Client work spans Flutter, React Native, Kotlin Multiplatform, Fyne and ratatui; services use Spring Boot and Ktor.\n\nOne problem shape repeats across languages: a public API is typed, cached, and rendered as charts or tables — rebuilt in Python, Kotlin, Java, Go, Rust, Dart and TypeScript. Data sources are free and mostly keyless; deployment is GitHub Actions to GitHub Pages.",
+  "techTags": {
+    "flutter-freight-corridor": [
+      "Riverpod",
+      "ferry",
+      "GraphQL Codegen",
+      "go_router",
+      "flutter_map",
+      "Repository Pattern",
+      "Pub Workspaces",
+      "shared_preferences",
+      "Conditional Imports"
+    ],
+    "github-portfolio-insights": [
+      "React 19",
+      "Vite",
+      "Material UI",
+      "Chart.js",
+      "Vitest",
+      "GitHub REST API",
+      "Static Site Generation",
+      "GitHub Pages"
+    ],
+    "react-native-energy-insights": [
+      "Expo",
+      "React Navigation",
+      "TanStack Query",
+      "Zustand",
+      "AsyncStorage",
+      "Maestro",
+      "React Native Testing Library",
+      "EIA API"
+    ],
+    "data-engineer-earthquake-pipeline": [
+      "Apache Airflow",
+      "dbt",
+      "ELT",
+      "PostgreSQL",
+      "Metabase",
+      "Docker Compose",
+      "USGS Earthquake API",
+      "Star Schema",
+      "Data Quality Tests"
+    ],
+    "data-engineer-wiki-streams": [
+      "Kafka Streams",
+      "KTables",
+      "Tumbling Windows",
+      "Hopping Windows",
+      "RocksDB State Stores",
+      "Redpanda",
+      "Ktor",
+      "Server-Sent Events",
+      "TopologyTestDriver",
+      "Wikimedia Stream"
+    ],
+    "data-engineer-crypto-streaming": [
+      "Medallion Architecture",
+      "Redpanda",
+      "Dagster",
+      "DuckDB",
+      "Parquet",
+      "Pydantic",
+      "Streamlit",
+      "Plotly",
+      "WebSockets",
+      "Binance API"
+    ],
+    "data-engineer-finance-analytics": [
+      "dbt",
+      "Dagster",
+      "DuckDB",
+      "BigQuery",
+      "Evidence",
+      "Looker Studio",
+      "Playwright",
+      "yfinance",
+      "FRED API"
+    ],
+    "finance-analytics-java-springboot": [
+      "Spring Boot",
+      "BigQuery Client",
+      "OpenAPI",
+      "Swagger UI",
+      "Maven",
+      "Docker",
+      "MockMvc",
+      "REST"
+    ],
+    "rust-monitor": [
+      "ratatui",
+      "sysinfo",
+      "NVML",
+      "Terminal UI",
+      "Cross-platform Builds"
+    ],
+    "python-shark": [
+      "NiceGUI",
+      "Scapy",
+      "Packet Capture",
+      "Background Threads",
+      "pytest"
+    ],
+    "go-chatbot": [
+      "Fyne",
+      "OpenAI-compatible API",
+      "Desktop GUI",
+      "CGO"
+    ],
+    "kmp-trivia": [
+      "Kotlin Multiplatform",
+      "Shared Business Logic",
+      "Android",
+      "iOS"
+    ],
+    "trivia-web-api": [
+      "REST API",
+      "Query Filtering"
+    ],
+    "contact-j2ee-aws": [
+      "J2EE",
+      "Servlets",
+      "Tomcat",
+      "MySQL",
+      "AWS"
+    ],
+    "apkloader": [
+      "Swing",
+      "ADB",
+      "Desktop GUI"
+    ],
+    "url-share-chrome-extension": [
+      "Chrome Extension",
+      "Browser APIs"
+    ],
+    "jeopardy-web-app": [
+      "Buzzer System",
+      "Score Tracking"
+    ],
+    "jeopardy-android-v2": [
+      "Android SDK"
+    ],
+    "jeopardy-android": [
+      "Android SDK"
+    ],
+    "jeopardy-kotlin": [
+      "Android SDK"
+    ]
+  }
+}

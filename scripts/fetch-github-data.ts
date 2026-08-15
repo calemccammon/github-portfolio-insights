@@ -1,178 +1,74 @@
 #!/usr/bin/env tsx
 /**
- * Fetch GitHub data for calemccammon using the GitHub CLI (`gh api`).
- * Calls the Claude API to generate an AI portfolio narrative and per-repo
- * technology tags. Writes public/data/github-stats.json for Vite to bundle.
+ * Fetch GitHub data for calemccammon using the GitHub CLI (`gh api`) and merge
+ * in the committed AI-authored content. Writes public/data/github-stats.json
+ * for Vite to bundle.
  *
- * Local:  requires `gh auth login` as calemccammon, plus ANTHROPIC_API_KEY
- * CI:     gh uses GITHUB_TOKEN; ANTHROPIC_API_KEY comes from repo secrets
+ * Local / CI: requires only the GitHub CLI (`gh auth login`, or GITHUB_TOKEN
+ * in Actions). No model provider, no API key, no per-build inference cost.
  *
- * Both AI sections degrade to null if the key is absent or the call fails --
- * the dashboard renders without them rather than failing the build.
+ * The narrative and per-repo tech tags live in src/data/ai-content.json. They
+ * were written by Claude with the repository list, descriptions, topics and
+ * READMEs in context, then reviewed and committed -- they are not generated at
+ * build time. They only need refreshing when the portfolio itself changes,
+ * which is far less often than this script runs.
  *
  * Usage: npx tsx scripts/fetch-github-data.ts
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import { execSync } from 'node:child_process';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { GitHubProfile, GitHubRepo, RepoLanguages, GitHubStats } from '../src/types/github.ts';
 
 const USERNAME = 'calemccammon';
-
-/**
- * This previously called GitHub Models, which was retired -- the endpoint now
- * answers 410 `github_models_retirement_brownout`, so both AI sections had been
- * silently rendering empty.
- */
-const MODEL = 'claude-opus-5';
-
-const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic() : null;
 
 function gh(endpoint: string): unknown {
   const out = execSync(`gh api "${endpoint}"`, { encoding: 'utf8' });
   return JSON.parse(out);
 }
 
-/** Turns an SDK error into one readable line, using its typed class. */
-function describe(err: unknown): string {
-  if (err instanceof Anthropic.AuthenticationError) return 'invalid or missing ANTHROPIC_API_KEY';
-  if (err instanceof Anthropic.RateLimitError) return 'rate limited';
-  if (err instanceof Anthropic.APIError) return `API error ${err.status}: ${err.message}`;
-  return (err as Error).message;
+interface AIContent {
+  narrative: string;
+  techTags: Record<string, string[]>;
 }
 
-async function fetchAINarrative(repos: GitHubRepo[]): Promise<string | null> {
-  if (!anthropic) {
-    console.warn('Warning: ANTHROPIC_API_KEY not set -- skipping AI narrative.');
-    return null;
-  }
-
+/**
+ * Reads the committed AI content. A missing or malformed file degrades to
+ * empty rather than failing the build -- the dashboard renders without those
+ * two sections instead of the deploy going red.
+ */
+function readAIContent(): AIContent | null {
+  const path = join(import.meta.dirname ?? process.cwd(), '..', 'src', 'data', 'ai-content.json');
   try {
-    const repoList = repos
-      .map((r) => `- ${r.name}: ${r.description ?? 'no description'} [topics: ${r.topics.join(', ') || 'none'}]`)
-      .join('\n');
-
-    const systemMessage =
-      `You write encyclopedic, matter-of-fact technical prose. ` +
-      `Describe only what is concretely present. No opinions, no editorial commentary, no value judgments. ` +
-      `Banned words and phrases: unusual, interesting, unique, stands out, showcases, demonstrates, highlights, ` +
-      `versatility, proficiency, well-rounded, reflects, suggests, leverages, robust, blend, merging, rigor, emphasis on.`;
-
-    const prompt =
-      `Here are a software engineer's GitHub repositories:\n\n${repoList}\n\n` +
-      `Write exactly 2 short paragraphs, under 90 words total. ` +
-      `First: what technical domains the work covers, naming the actual tools and architectures used. ` +
-      `Second: the recurring patterns or repeated technology choices across repos. ` +
-      `State facts only. Do not editorialize. No bullet points.`;
-
-    const response = await anthropic.messages.create({
-      model: MODEL,
-      // Generous, because max_tokens caps thinking plus response text together.
-      max_tokens: 16000,
-      system: systemMessage,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const text = response.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('')
-      .trim();
-
-    if (!text) {
-      console.warn(`Warning: AI narrative empty (stop_reason: ${response.stop_reason})`);
-      return null;
-    }
-
-    console.log('AI narrative generated');
-    return text;
+    const parsed = JSON.parse(readFileSync(path, 'utf8')) as Partial<AIContent>;
+    if (!parsed.narrative || !parsed.techTags) throw new Error('missing narrative or techTags');
+    return { narrative: parsed.narrative, techTags: parsed.techTags };
   } catch (err) {
-    console.warn('Warning: AI narrative skipped:', describe(err));
+    console.warn('Warning: AI content unavailable:', (err as Error).message);
     return null;
   }
 }
 
 /**
- * The UI wants `{ "repo-name": ["Tag"] }`, but a schema with arbitrary keys
- * cannot be expressed -- structured outputs require `additionalProperties:
- * false`. So the model returns a list of named entries and we reshape it here.
+ * Drops entries for repos that no longer exist, so a renamed or deleted repo
+ * cannot leave a stale tag list behind in the published JSON.
  */
-const TECH_TAGS_SCHEMA = {
-  type: 'object',
-  properties: {
-    repositories: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'The repository name, exactly as given.' },
-          tags: { type: 'array', items: { type: 'string' } },
-        },
-        required: ['name', 'tags'],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ['repositories'],
-  additionalProperties: false,
-} as const;
-
-async function fetchAITechTags(repos: GitHubRepo[]): Promise<Record<string, string[]> | null> {
-  if (!anthropic) return null;
-  try {
-    const readmes: string[] = [];
-    for (const repo of repos) {
-      try {
-        const data = gh(`/repos/${USERNAME}/${repo.name}/readme`) as { content: string };
-        const text = Buffer.from(data.content, 'base64').toString('utf8').slice(0, 2000);
-        readmes.push(`=== ${repo.name} ===\n${text}`);
-      } catch {
-        readmes.push(`=== ${repo.name} ===\n(no readme)`);
-      }
-    }
-
-    const prompt =
-      `Here are README files for a developer's GitHub repositories.\n\n${readmes.join('\n\n')}\n\n` +
-      `For each repository, extract a list of specific technologies, frameworks, libraries, architectural patterns, and design patterns ` +
-      `that are actually mentioned or clearly evident. Be specific (e.g. "Coroutines", "MVVM", "KTables", "Room", "Medallion Architecture") ` +
-      `rather than generic (e.g. not "backend", "database"). Omit language names (Java, Kotlin, Python, etc.) -- those are tracked separately. ` +
-      `Include one entry per repository, using its exact name.`;
-
-    const response = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      // Reading twenty READMEs and deciding what counts as a specific,
-      // non-generic technology is worth thinking about.
-      thinking: { type: 'adaptive' },
-      // The schema is enforced server-side, so no parse-and-retry loop.
-      output_config: { format: { type: 'json_schema', schema: TECH_TAGS_SCHEMA } },
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const raw = response.content
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('');
-
-    if (!raw) {
-      console.warn(`Warning: AI tech tags empty (stop_reason: ${response.stop_reason})`);
-      return null;
-    }
-
-    const parsed = JSON.parse(raw) as { repositories: Array<{ name: string; tags: string[] }> };
-    const byRepo: Record<string, string[]> = {};
-    for (const entry of parsed.repositories) {
-      if (entry.tags.length > 0) byRepo[entry.name] = entry.tags;
-    }
-
-    console.log(`AI tech tags extracted for ${Object.keys(byRepo).length} repos`);
-    return byRepo;
-  } catch (err) {
-    console.warn('Warning: AI tech tags skipped:', describe(err));
-    return null;
+function tagsForLiveRepos(
+  techTags: Record<string, string[]>,
+  repos: GitHubRepo[],
+): Record<string, string[]> {
+  const live = new Set(repos.map((r) => r.name));
+  const matched: Record<string, string[]> = {};
+  for (const [name, tags] of Object.entries(techTags)) {
+    if (live.has(name) && tags.length > 0) matched[name] = tags;
   }
+
+  const untagged = repos.filter((r) => !matched[r.name]).map((r) => r.name);
+  if (untagged.length > 0) {
+    console.warn(`Note: no committed tech tags for ${untagged.length} repo(s): ${untagged.join(', ')}`);
+  }
+  return matched;
 }
 
 console.log('Fetching GitHub profile...');
@@ -195,11 +91,11 @@ for (const repo of ownRepos) {
   }
 }
 
-console.log('Calling Claude for portfolio narrative...');
-const aiNarrative = await fetchAINarrative(ownRepos);
-
-console.log('Calling Claude for README tech tag extraction...');
-const aiTechTags = await fetchAITechTags(ownRepos);
+console.log('Reading committed AI content...');
+const aiContent = readAIContent();
+const aiNarrative = aiContent?.narrative ?? null;
+const aiTechTags = aiContent ? tagsForLiveRepos(aiContent.techTags, ownRepos) : null;
+if (aiTechTags) console.log(`AI tech tags matched for ${Object.keys(aiTechTags).length} repos`);
 
 const stats: GitHubStats = {
   profile,

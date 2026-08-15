@@ -60,9 +60,6 @@ jobs:
       - name: Fetch GitHub data via gh CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Absent key degrades gracefully: the two AI sections render nothing
-          # rather than failing the deploy.
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npx tsx scripts/fetch-github-data.ts
 
       - name: Build
