@@ -17,6 +17,15 @@ import type { GitHubProfile, GitHubRepo, RepoLanguages, GitHubStats } from '../s
 
 const USERNAME = 'calemccammon';
 
+/**
+ * GitHub Models moved off the Azure-hosted endpoint; the old
+ * `models.inference.ai.azure.com` host now answers 404, which is why both AI
+ * sections silently rendered empty. The GitHub-hosted API also requires the
+ * model name to carry its provider prefix -- plain `gpt-4o` is not resolvable.
+ */
+const MODELS_ENDPOINT = 'https://models.github.ai/inference/chat/completions';
+const MODELS_NAME = 'openai/gpt-4o';
+
 function gh(endpoint: string): unknown {
   const out = execSync(`gh api "${endpoint}"`, { encoding: 'utf8' });
   return JSON.parse(out);
@@ -58,14 +67,14 @@ async function fetchAINarrative(repos: GitHubRepo[]): Promise<string | null> {
       `Second: the recurring patterns or repeated technology choices across repos. ` +
       `State facts only. Do not editorialize. No bullet points.`;
 
-    const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+    const response = await fetch(MODELS_ENDPOINT, {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + token,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: MODELS_NAME,
         messages: [
           { role: 'system', content: systemMessage },
           { role: 'user', content: prompt },
@@ -116,11 +125,11 @@ async function fetchAITechTags(repos: GitHubRepo[], token: string | null): Promi
       `Return ONLY valid JSON in this exact shape, no markdown, no explanation:\n` +
       `{"repo-name": ["Tag1", "Tag2"], ...}`;
 
-    const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+    const response = await fetch(MODELS_ENDPOINT, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: MODELS_NAME,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
         max_tokens: 1500,
