@@ -27,7 +27,7 @@ export function AITechInsights({ aiTechTags }: Props) {
         <Typography variant="h6" sx={{ fontWeight: 600 }}>Patterns &amp; Libraries</Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Extracted from README content by AI
+        Identified per repository by Claude
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
         {sorted.map(([tag, count]) => {
