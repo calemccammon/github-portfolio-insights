@@ -1,11 +1,6 @@
 import { Box, Card, CardActionArea, CardContent, Chip, Grid, Typography } from "@mui/material";
 import type { GitHubRepo } from "../types/github";
-
-const LANGUAGE_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5",
-  Kotlin: "#A97BFF", Java: "#b07219", Go: "#00ADD8", Rust: "#dea584",
-  HTML: "#e34c26", CSS: "#563d7c", Shell: "#89e051", SQL: "#e38c00", Dockerfile: "#384d54",
-};
+import { languageColor } from "../utils/languages";
 
 function timeAgo(dateStr: string): string {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
@@ -17,7 +12,10 @@ function timeAgo(dateStr: string): string {
 }
 
 function RepoCard({ repo }: { repo: GitHubRepo }) {
-  const color = LANGUAGE_COLORS[repo.language ?? ""] ?? "#8b949e";
+  // Repos with no detected language keep the neutral grey; a language we
+  // simply have no entry for gets a generated colour rather than looking
+  // like "unknown".
+  const color = repo.language ? languageColor(repo.language) : "#8b949e";
   return (
     <Card elevation={0} sx={{ height: "100%" }}>
       <CardActionArea
