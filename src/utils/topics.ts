@@ -7,6 +7,14 @@ const KNOWN_TOPICS: Record<string, string> = {
   "data-visualization": "Data Visualization", "looker-studio": "Looker Studio",
   "bigquery": "BigQuery", "postgresql": "PostgreSQL", "aws": "AWS", "ios": "iOS",
   "eia-api": "EIA API", "openai": "OpenAI", "j2ee": "J2EE", "llm": "LLM",
+  // Title-casing alone would render these as "Graphql" / "Open Data api".
+  "graphql": "GraphQL", "open-data": "Open Data", "flutter-web": "Flutter Web",
+  // Pre-existing slugs the generic title-caser mangles: "Github Api",
+  // "Gpt 4o", "Material Ui", "Chart Js", "Mysql", "Gui".
+  "github-api": "GitHub API", "github-models": "GitHub Models",
+  "github-pages": "GitHub Pages", "gpt-4o": "GPT-4o", "material-ui": "Material UI",
+  "chart-js": "Chart.js", "mysql": "MySQL", "gui": "GUI", "nicegui": "NiceGUI",
+  "dbt": "dbt", "kafka": "Kafka", "airflow": "Airflow",
 };
 
 export function formatTopic(slug: string): string {

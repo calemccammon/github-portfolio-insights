@@ -1,21 +1,12 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { languageColor } from "../utils/languages";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Props {
   languages: Record<string, number>;
-}
-
-const LANGUAGE_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5",
-  Kotlin: "#A97BFF", Java: "#b07219", Go: "#00ADD8", Rust: "#dea584",
-  HTML: "#e34c26", CSS: "#563d7c", Shell: "#89e051", SQL: "#e38c00", Dockerfile: "#384d54",
-};
-
-function getColor(lang: string, index: number): string {
-  return LANGUAGE_COLORS[lang] ?? `hsl(${(index * 47) % 360}, 60%, 55%)`;
 }
 
 export function LanguageChart({ languages }: Props) {
@@ -26,7 +17,7 @@ export function LanguageChart({ languages }: Props) {
     labels: entries.map(([name]) => name),
     datasets: [{
       data: entries.map(([, bytes]) => bytes),
-      backgroundColor: entries.map(([name], i) => getColor(name, i)),
+      backgroundColor: entries.map(([name]) => languageColor(name)),
       borderColor: "#161b22",
       borderWidth: 2,
       hoverOffset: 6,

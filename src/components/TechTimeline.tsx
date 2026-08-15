@@ -8,22 +8,12 @@ import {
   Legend,
 } from "chart.js";
 import type { GitHubRepo } from "../types/github";
+import { languageColor } from "../utils/languages";
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
 interface Props {
   repos: GitHubRepo[];
-}
-
-const LANGUAGE_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6", JavaScript: "#f1e05a", Python: "#3572A5",
-  Kotlin: "#A97BFF", Java: "#b07219", Go: "#00ADD8", Rust: "#dea584",
-  HTML: "#e34c26", CSS: "#563d7c", Shell: "#89e051", SQL: "#e38c00",
-  "C#": "#178600", Swift: "#F05138", Dockerfile: "#384d54",
-};
-
-function getColor(lang: string): string {
-  return LANGUAGE_COLORS[lang] ?? "#8b949e";
 }
 
 export function TechTimeline({ repos }: Props) {
@@ -43,8 +33,8 @@ export function TechTimeline({ repos }: Props) {
         name: r.name,
         pushed: new Date(r.pushed_at).toLocaleDateString(),
       })),
-      backgroundColor: getColor(lang) + "cc",
-      borderColor: getColor(lang),
+      backgroundColor: languageColor(lang) + "cc",
+      borderColor: languageColor(lang),
       borderWidth: 1,
     };
   });

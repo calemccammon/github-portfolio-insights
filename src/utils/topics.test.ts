@@ -8,6 +8,22 @@ describe('formatTopic', () => {
     expect(formatTopic('aws')).toBe('AWS');
     expect(formatTopic('kmp')).toBe('KMP');
     expect(formatTopic('j2ee')).toBe('J2EE');
+    // Acronym casing the generic title-caser gets wrong.
+    expect(formatTopic('graphql')).toBe('GraphQL');
+    expect(formatTopic('flutter-web')).toBe('Flutter Web');
+    expect(formatTopic('github-api')).toBe('GitHub API');
+    expect(formatTopic('gpt-4o')).toBe('GPT-4o');
+    expect(formatTopic('material-ui')).toBe('Material UI');
+    expect(formatTopic('chart-js')).toBe('Chart.js');
+    expect(formatTopic('mysql')).toBe('MySQL');
+    // Lower-case by convention, not a title-casing miss.
+    expect(formatTopic('dbt')).toBe('dbt');
+  });
+
+  it('title-cases the plain Flutter topics correctly without a mapping', () => {
+    expect(formatTopic('flutter')).toBe('Flutter');
+    expect(formatTopic('dart')).toBe('Dart');
+    expect(formatTopic('riverpod')).toBe('Riverpod');
   });
 
   it('title-cases unknown kebab-case slugs', () => {
