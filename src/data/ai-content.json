@@ -2,8 +2,19 @@
   "_comment": "AI-authored, committed content. Written by Claude with the repository list, descriptions, topics and available READMEs in context, then reviewed and committed. Not generated at build time -- see README. Refresh by asking Claude to regenerate this file when the portfolio changes.",
   "generatedBy": "Claude (Claude Code session)",
   "generatedAt": "2026-08-15",
-  "narrative": "The repositories cover data engineering, mobile and desktop clients, and web APIs. Pipelines use Airflow, dbt, Dagster, Kafka Streams and Redpanda over PostgreSQL, DuckDB and BigQuery. Client work spans Flutter, React Native, Kotlin Multiplatform, Fyne and ratatui; services use Spring Boot and Ktor.\n\nOne problem shape repeats across languages: a public API is typed, cached, and rendered as charts or tables — rebuilt in Python, Kotlin, Java, Go, Rust, Dart and TypeScript. Data sources are free and mostly keyless; deployment is GitHub Actions to GitHub Pages.",
+  "narrative": "The repositories cover data engineering, model evaluation, mobile and desktop clients, and web APIs. Pipelines use Airflow, dbt, Dagster, Kafka Streams and Redpanda over PostgreSQL, DuckDB and BigQuery. Client work spans Flutter, React Native, Kotlin Multiplatform, Fyne and ratatui; services use Spring Boot and Ktor.\n\nOne problem shape repeats across languages: a public API is typed, cached, and rendered as charts or tables — rebuilt in Python, Kotlin, Java, Go, Rust, Dart and TypeScript. Data sources are free and mostly keyless; deployment is GitHub Actions to GitHub Pages.",
   "techTags": {
+    "text-to-sql-evals": [
+      "Execution Accuracy",
+      "DuckDB",
+      "Anthropic SDK",
+      "Result-Set Comparison",
+      "Failure Taxonomy",
+      "Prompt Caching",
+      "Frozen Fixture",
+      "Parquet",
+      "pytest"
+    ],
     "flutter-freight-corridor": [
       "Riverpod",
       "ferry",
