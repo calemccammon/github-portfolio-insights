@@ -19,6 +19,19 @@ describe('formatTopic', () => {
     // Lower-case by convention, not a title-casing miss.
     expect(formatTopic('dbt')).toBe('dbt');
     expect(formatTopic('ratatui')).toBe('ratatui');
+    // Introduced by freight-alerts; title-casing gives "Oauth" and "Ssrf".
+    expect(formatTopic('oauth')).toBe('OAuth');
+    expect(formatTopic('ssrf')).toBe('SSRF');
+  });
+
+  it('uses one slug per technology so chips do not fragment', () => {
+    // freight-alerts was tagged `postgres` while earthquake-pipeline used
+    // `postgresql`. Both render fine in isolation, but as two chips for one
+    // technology the filter silently splits the repos between them. The repo
+    // topic was renamed rather than aliased here, because two slugs mapping to
+    // one label would produce two identically-named chips instead.
+    expect(formatTopic('postgresql')).toBe('PostgreSQL');
+    expect(formatTopic('postgres')).toBe('Postgres');
   });
 
   it('handles acronyms and hyphenated names the title-caser mangles', () => {

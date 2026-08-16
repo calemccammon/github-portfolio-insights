@@ -19,6 +19,8 @@ const KNOWN_TOPICS: Record<string, string> = {
   "sql": "SQL", "text-to-sql": "Text-to-SQL", "duckdb": "DuckDB",
   // Lower-case by convention, like dbt.
   "ratatui": "ratatui",
+  // Acronyms; title-casing renders these as "Oauth" and "Ssrf".
+  "oauth": "OAuth", "ssrf": "SSRF",
 };
 
 export function formatTopic(slug: string): string {
