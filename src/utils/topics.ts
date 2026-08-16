@@ -15,6 +15,10 @@ const KNOWN_TOPICS: Record<string, string> = {
   "github-pages": "GitHub Pages", "gpt-4o": "GPT-4o", "material-ui": "Material UI",
   "chart-js": "Chart.js", "mysql": "MySQL", "gui": "GUI", "nicegui": "NiceGUI",
   "dbt": "dbt", "kafka": "Kafka", "airflow": "Airflow",
+  // Title-casing renders these as "Sql", "Text To Sql", and "Duckdb".
+  "sql": "SQL", "text-to-sql": "Text-to-SQL", "duckdb": "DuckDB",
+  // Lower-case by convention, like dbt.
+  "ratatui": "ratatui",
 };
 
 export function formatTopic(slug: string): string {

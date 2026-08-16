@@ -18,6 +18,23 @@ describe('formatTopic', () => {
     expect(formatTopic('mysql')).toBe('MySQL');
     // Lower-case by convention, not a title-casing miss.
     expect(formatTopic('dbt')).toBe('dbt');
+    expect(formatTopic('ratatui')).toBe('ratatui');
+  });
+
+  it('handles acronyms and hyphenated names the title-caser mangles', () => {
+    // These shipped to production rendering as "Sql", "Text To Sql", "Duckdb".
+    expect(formatTopic('sql')).toBe('SQL');
+    expect(formatTopic('text-to-sql')).toBe('Text-to-SQL');
+    expect(formatTopic('duckdb')).toBe('DuckDB');
+  });
+
+  it('title-cases the newer data-tool topics correctly without a mapping', () => {
+    expect(formatTopic('dagster')).toBe('Dagster');
+    expect(formatTopic('redpanda')).toBe('Redpanda');
+    expect(formatTopic('evidence')).toBe('Evidence');
+    expect(formatTopic('parquet')).toBe('Parquet');
+    expect(formatTopic('streamlit')).toBe('Streamlit');
+    expect(formatTopic('metabase')).toBe('Metabase');
   });
 
   it('title-cases the plain Flutter topics correctly without a mapping', () => {
