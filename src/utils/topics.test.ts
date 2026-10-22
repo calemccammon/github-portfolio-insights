@@ -41,6 +41,14 @@ describe('formatTopic', () => {
     expect(formatTopic('duckdb')).toBe('DuckDB');
   });
 
+  it('maps the k2l topics the title-caser mangles', () => {
+    expect(formatTopic('luajit')).toBe('LuaJIT');
+    expect(formatTopic('kotlin-to-lua')).toBe('Kotlin-to-Lua');
+    // Plain words title-case correctly without a mapping.
+    expect(formatTopic('transpiler')).toBe('Transpiler');
+    expect(formatTopic('gradle-plugin')).toBe('Gradle Plugin');
+  });
+
   it('title-cases the newer data-tool topics correctly without a mapping', () => {
     expect(formatTopic('dagster')).toBe('Dagster');
     expect(formatTopic('redpanda')).toBe('Redpanda');

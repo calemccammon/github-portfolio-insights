@@ -21,6 +21,8 @@ const KNOWN_TOPICS: Record<string, string> = {
   "ratatui": "ratatui",
   // Acronyms; title-casing renders these as "Oauth" and "Ssrf".
   "oauth": "OAuth", "ssrf": "SSRF",
+  // Title-casing renders these as "Luajit" and "Kotlin To Lua".
+  "luajit": "LuaJIT", "kotlin-to-lua": "Kotlin-to-Lua",
 };
 
 export function formatTopic(slug: string): string {
