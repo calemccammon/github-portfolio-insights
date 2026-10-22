@@ -95,7 +95,7 @@ function App() {
           <HeroSection profile={stats.profile} />
           <AIPortfolioSummary narrative={stats.aiNarrative} />
           <Suspense fallback={<ChartFallback height={260} />}>
-            <TechTimeline repos={stats.repos} />
+            <TechTimeline repos={stats.repos} repoLanguages={stats.repoLanguages ?? {}} />
           </Suspense>
           <Suspense fallback={<ChartFallback height={340} />}>
             <LanguageChart

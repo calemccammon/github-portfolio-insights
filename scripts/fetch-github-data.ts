@@ -80,9 +80,11 @@ const ownRepos = repos.filter((r) => !r.fork);
 
 console.log(`Fetching languages for ${ownRepos.length} repos...`);
 const aggregatedLanguages: Record<string, number> = {};
+const repoLanguages: Record<string, RepoLanguages> = {};
 for (const repo of ownRepos) {
   try {
     const repoLangs = gh(`/repos/${USERNAME}/${repo.name}/languages`) as RepoLanguages;
+    repoLanguages[repo.name] = repoLangs;
     for (const [lang, bytes] of Object.entries(repoLangs)) {
       aggregatedLanguages[lang] = (aggregatedLanguages[lang] ?? 0) + bytes;
     }
@@ -101,6 +103,7 @@ const stats: GitHubStats = {
   profile,
   repos: ownRepos,
   languages: aggregatedLanguages,
+  repoLanguages,
   aiNarrative,
   aiTechTags,
   fetchedAt: new Date().toISOString(),

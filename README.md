@@ -12,7 +12,7 @@ A static dashboard built with **React + TypeScript + Vite** and **Material UI** 
 |---|---|
 | **Hero** | Avatar, name, bio, and location |
 | **AI Portfolio Analysis** | 2-paragraph narrative written by Claude from repo metadata |
-| **Tech Adoption Timeline** | Bubble chart — when each language first appeared in the portfolio |
+| **Tech Adoption Timeline** | Bubble chart — when each language first appeared in the portfolio, counting every language with at least 10% of a repo's code |
 | **Language Distribution** | Doughnut chart — byte counts per language with percentages |
 | **Topics** | GitHub topics declared across repos — click to filter the grid |
 | **Patterns & Libraries** | Frameworks, patterns, and tools Claude extracted per repository — click to filter |

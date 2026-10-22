@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { languageColor, hasKnownColor } from '../utils/languages';
+import { languageColor, hasKnownColor, significantLanguages } from '../utils/languages';
 
 describe('languageColor', () => {
   it('uses the GitHub Linguist colour for known languages', () => {
@@ -15,7 +15,7 @@ describe('languageColor', () => {
     // new language fails here rather than silently drawing a random colour.
     for (const language of [
       'C#', 'CSS', 'Dart', 'Dockerfile', 'Go', 'HTML', 'Java',
-      'JavaScript', 'Kotlin', 'Python', 'Rust', 'Swift', 'TypeScript',
+      'JavaScript', 'Kotlin', 'Lua', 'Python', 'Rust', 'Swift', 'TypeScript',
     ]) {
       expect(hasKnownColor(language), `${language} has no assigned colour`).toBe(true);
     }
@@ -33,5 +33,25 @@ describe('languageColor', () => {
     // would produce an invalid colour and silently drop the bubble fill.
     expect(languageColor('Zig') + 'cc').toMatch(/^#[0-9a-f]{8}$/);
     expect(languageColor('Dart') + 'cc').toMatch(/^#[0-9a-fA-F]{8}$/);
+  });
+});
+
+describe('significantLanguages', () => {
+  it('keeps languages with at least 10% of the bytes, largest first', () => {
+    // k2l: a Kotlin compiler with a Lua runtime and a little shell.
+    expect(significantLanguages({ Kotlin: 1980, Lua: 307, Shell: 5 }, 'Kotlin')).toEqual([
+      { language: 'Kotlin', share: 1980 / 2292 },
+      { language: 'Lua', share: 307 / 2292 },
+    ]);
+  });
+
+  it('counts a language at exactly 10%', () => {
+    expect(significantLanguages({ Go: 90, HTML: 10 }, 'Go').map((l) => l.language))
+      .toEqual(['Go', 'HTML']);
+  });
+
+  it('falls back to the primary language without byte data', () => {
+    expect(significantLanguages(undefined, 'Java')).toEqual([{ language: 'Java', share: 1 }]);
+    expect(significantLanguages({}, null)).toEqual([]);
   });
 });

@@ -75,3 +75,27 @@ export function languageColor(language: string): string {
 export function hasKnownColor(language: string): boolean {
   return language in LANGUAGE_COLORS;
 }
+
+/** Share of a repo's code a language needs before the timeline counts it. */
+export const SIGNIFICANT_SHARE = 0.1;
+
+/**
+ * The languages that make up at least SIGNIFICANT_SHARE of a repo's bytes,
+ * with their shares, largest first.
+ *
+ * Counting only the primary language hid real work: k2l is a Kotlin repo
+ * whose runtime is written in Lua, so Lua vanished from the timeline. Counting
+ * every language would add a row for each stray Dockerfile or build script.
+ * Falls back to the primary language when there is no byte data.
+ */
+export function significantLanguages(
+  bytes: Record<string, number> | undefined,
+  primary: string | null,
+): Array<{ language: string; share: number }> {
+  const total = Object.values(bytes ?? {}).reduce((sum, n) => sum + n, 0);
+  if (total === 0) return primary ? [{ language: primary, share: 1 }] : [];
+  return Object.entries(bytes ?? {})
+    .map(([language, n]) => ({ language, share: n / total }))
+    .filter((l) => l.share >= SIGNIFICANT_SHARE)
+    .sort((a, b) => b.share - a.share);
+}
