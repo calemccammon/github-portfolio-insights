@@ -1,8 +1,8 @@
 {
   "_comment": "AI-authored, committed content. Written by Claude with the repository list, descriptions, topics and available READMEs in context, then reviewed and committed. Not generated at build time -- see README. Refresh by asking Claude to regenerate this file when the portfolio changes.",
   "generatedBy": "Claude (Claude Code session)",
-  "generatedAt": "2026-08-16",
-  "narrative": "The repositories cover data engineering, model evaluation, mobile and desktop clients, and web APIs. Pipelines use Airflow, dbt, Dagster, Kafka Streams and Redpanda over PostgreSQL, DuckDB and BigQuery. Client work spans Flutter, React Native, Kotlin Multiplatform, Fyne and ratatui; services use Spring Boot, Ktor and Go.\n\nOne problem shape repeats across languages: a public API is typed, cached, and rendered as charts or tables — rebuilt in Python, Kotlin, Java, Go, Rust, Dart and TypeScript. Data sources are free and mostly keyless. Most deploy through GitHub Actions to GitHub Pages; one runs as a scheduled service with accounts, a write path, and duplicate suppression enforced by the database.",
+  "generatedAt": "2026-10-22",
+  "narrative": "The repositories cover data engineering, model evaluation, mobile and desktop clients, and web APIs. Pipelines use Airflow, dbt, Dagster, Kafka Streams and Redpanda over PostgreSQL, DuckDB and BigQuery. Client work spans Flutter, React Native, Kotlin Multiplatform, Fyne and ratatui; services use Spring Boot, Ktor and Go. One project is a compiler: k2l translates Kotlin to plain Lua for five Lua runtimes.\n\nOne problem shape repeats across languages: a public API is typed, cached, and rendered as charts or tables — rebuilt in Python, Kotlin, Java, Go, Rust, Dart and TypeScript. Data sources are free and mostly keyless. Most deploy through GitHub Actions to GitHub Pages; one runs as a scheduled service with accounts, a write path, and duplicate suppression enforced by the database.",
   "techTags": {
     "apkloader": [
       "Swing",
@@ -122,6 +122,16 @@
     "jeopardy-web-app": [
       "Buzzer System",
       "Score Tracking"
+    ],
+    "k2l": [
+      "Kotlin Analysis API",
+      "Source-to-Source Compilation",
+      "Lua 5.1–5.4",
+      "LuaJIT",
+      "Lua Patterns",
+      "Source Maps",
+      "Golden Tests",
+      "Gradle Plugin"
     ],
     "kmp-trivia": [
       "Kotlin Multiplatform",
