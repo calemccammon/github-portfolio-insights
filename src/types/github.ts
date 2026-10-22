@@ -35,6 +35,8 @@ export interface GitHubStats {
   repos: GitHubRepo[];
   /** aggregated language bytes across all repos */
   languages: Record<string, number>;
+  /** language bytes per repo, keyed by repo name */
+  repoLanguages: Record<string, RepoLanguages>;
   /** AI-generated portfolio narrative */
   aiNarrative: string | null;
   /** AI-extracted tech tags per repo from README analysis */

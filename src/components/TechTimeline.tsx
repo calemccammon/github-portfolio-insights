@@ -7,30 +7,33 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import type { GitHubRepo } from "../types/github";
-import { languageColor } from "../utils/languages";
+import type { GitHubRepo, RepoLanguages } from "../types/github";
+import { languageColor, significantLanguages, SIGNIFICANT_SHARE } from "../utils/languages";
 
 ChartJS.register(LinearScale, PointElement, Tooltip, Legend);
 
 interface Props {
   repos: GitHubRepo[];
+  repoLanguages: Record<string, RepoLanguages>;
 }
 
-export function TechTimeline({ repos }: Props) {
-  // Group repos by language, assign a y-index per language
-  const languages = Array.from(
-    new Set(repos.map((r) => r.language).filter(Boolean) as string[])
-  ).sort();
+export function TechTimeline({ repos, repoLanguages }: Props) {
+  // A repo appears once per language making up a significant share of its code
+  const entries = repos.flatMap((repo) =>
+    significantLanguages(repoLanguages[repo.name], repo.language).map((l) => ({ repo, ...l }))
+  );
+  const languages = Array.from(new Set(entries.map((e) => e.language))).sort();
 
   const datasets = languages.map((lang) => {
-    const langRepos = repos.filter((r) => r.language === lang);
+    const langEntries = entries.filter((e) => e.language === lang);
     return {
       label: lang,
-      data: langRepos.map((r) => ({
+      data: langEntries.map(({ repo: r, share }) => ({
         x: new Date(r.created_at).getFullYear() + new Date(r.created_at).getMonth() / 12,
         y: languages.indexOf(lang),
         r: 8,
         name: r.name,
+        share: Math.round(share * 100),
         pushed: new Date(r.pushed_at).toLocaleDateString(),
       })),
       backgroundColor: languageColor(lang) + "cc",
@@ -75,8 +78,8 @@ export function TechTimeline({ repos }: Props) {
       tooltip: {
         callbacks: {
           label: (ctx: { raw: unknown }) => {
-            const d = ctx.raw as { name: string; pushed: string };
-            return [`  ${d.name}`, `  last push: ${d.pushed}`];
+            const d = ctx.raw as { name: string; share: number; pushed: string };
+            return [`  ${d.name}`, `  ${d.share}% of the code`, `  last push: ${d.pushed}`];
           },
           title: (items: { dataset: { label: string } }[]) =>
             items[0]?.dataset.label ?? "",
@@ -96,7 +99,8 @@ export function TechTimeline({ repos }: Props) {
     <Box sx={{ mb: 4 }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>Tech Adoption Timeline</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        When each language first appeared in the portfolio
+        When each language first appeared in the portfolio — counting every language that makes up at
+        least {SIGNIFICANT_SHARE * 100}% of a repository
       </Typography>
       <Paper elevation={0} sx={{ p: 2 }}>
         <Box sx={{ height: Math.max(200, languages.length * 40 + 40), position: "relative" }}>
