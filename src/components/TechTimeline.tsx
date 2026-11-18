@@ -97,10 +97,10 @@ export function TechTimeline({ repos, repoLanguages }: Props) {
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>Tech Adoption Timeline</Typography>
+      <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 0.5 }}>Languages over time</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        When each language first appeared in the portfolio — counting every language that makes up at
-        least {SIGNIFICANT_SHARE * 100}% of a repository
+        Each dot is a repository at the date it was created, in the row of every language that makes
+        up at least {SIGNIFICANT_SHARE * 100}% of its code.
       </Typography>
       <Paper elevation={0} sx={{ p: 2 }}>
         <Box sx={{ height: Math.max(200, languages.length * 40 + 40), position: "relative" }}>

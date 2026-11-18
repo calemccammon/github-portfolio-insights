@@ -5,7 +5,6 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import type { GitHubRepo } from "../types/github";
 import { languageColor } from "../utils/languages";
-import { formatTopic } from "../utils/topics";
 import {
   availableLanguages, filterRepos, hasActiveFilters, sortRepos,
   SORT_KEYS, SORT_LABELS, type RepoFilters, type SortKey,
@@ -20,7 +19,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 365)}y ago`;
 }
 
-function RepoCard({ repo }: { repo: GitHubRepo }) {
+function RepoCard({ repo, tags }: { repo: GitHubRepo; tags: string[] }) {
   // Repos with no detected language keep the neutral grey; a language we
   // simply have no entry for gets a generated colour rather than looking
   // like "unknown".
@@ -46,9 +45,9 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
               {repo.description}
             </Typography>
           )}
-          {repo.topics.length > 0 && (
+          {tags.length > 0 && (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {repo.topics.slice(0, 4).map((t) => (
+              {tags.slice(0, 4).map((t) => (
                 <Chip key={t} label={t} size="small" color="primary" variant="outlined" sx={{ fontSize: 10, height: 20 }} />
               ))}
             </Box>
@@ -76,27 +75,26 @@ function RepoCard({ repo }: { repo: GitHubRepo }) {
 
 interface Props {
   repos: GitHubRepo[];
-  aiTechTags: Record<string, string[]> | null;
+  techTags: Record<string, string[]> | null;
   filters: RepoFilters;
   onSearchChange: (search: string) => void;
   onSortChange: (sort: SortKey) => void;
   onLanguagesChange: (languages: string[]) => void;
-  onToggleTopic: (topic: string) => void;
   onToggleTag: (tag: string) => void;
   onClearAll: () => void;
 }
 
 export function RepoGrid({
-  repos, aiTechTags, filters, onSearchChange, onSortChange,
-  onLanguagesChange, onToggleTopic, onToggleTag, onClearAll,
+  repos, techTags, filters, onSearchChange, onSortChange,
+  onLanguagesChange, onToggleTag, onClearAll,
 }: Props) {
-  const visible = sortRepos(filterRepos(repos, filters, aiTechTags), filters.sort);
+  const visible = sortRepos(filterRepos(repos, filters, techTags), filters.sort);
   const filtered = hasActiveFilters(filters);
   const languages = availableLanguages(repos);
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+    <Box component="section" sx={{ mb: 4 }}>
+      <Typography variant="h6" component="h2" sx={{ fontWeight: 600, mb: 1 }}>
         Repositories{" "}
         <Typography component="span" variant="body2" color="text.secondary">
           ({filtered ? `${visible.length} of ${repos.length}` : repos.length})
@@ -167,9 +165,6 @@ export function RepoGrid({
           sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75, mb: 2 }}
         >
           <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>Filtering by:</Typography>
-          {filters.topics.map((topic) => (
-            <Chip key={`topic-${topic}`} size="small" color="primary" label={formatTopic(topic)} onDelete={() => onToggleTopic(topic)} />
-          ))}
           {filters.tags.map((tag) => (
             <Chip key={`tag-${tag}`} size="small" color="primary" label={tag} onDelete={() => onToggleTag(tag)} />
           ))}
@@ -201,7 +196,7 @@ export function RepoGrid({
         <Grid container spacing={2}>
           {visible.map((repo) => (
             <Grid key={repo.id} size={{ xs: 12, sm: 6 }}>
-              <RepoCard repo={repo} />
+              <RepoCard repo={repo} tags={techTags?.[repo.name] ?? []} />
             </Grid>
           ))}
         </Grid>

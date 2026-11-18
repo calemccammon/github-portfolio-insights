@@ -1,11 +1,10 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { ThemeProvider, createTheme, CssBaseline, Container, Box, CircularProgress, Skeleton, Typography } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline, Container, Box, CircularProgress, Link, Skeleton, Typography } from '@mui/material';
 import './index.css';
 import type { GitHubStats } from './types/github';
 import { HeroSection } from './components/HeroSection';
-import { AIPortfolioSummary } from './components/AIPortfolioSummary';
-import { TechBadges } from './components/TechBadges';
-import { AITechInsights } from './components/AITechInsights';
+import { FeaturedProjects } from './components/FeaturedProjects';
+import { Technologies } from './components/Technologies';
 import { RepoGrid } from './components/RepoGrid';
 import { useRepoFilters } from './hooks/useRepoFilters';
 
@@ -47,13 +46,14 @@ const darkTheme = createTheme({
   },
 });
 
+const SOURCE_URL = 'https://github.com/calemccammon/github-portfolio-insights';
 const DATA_URL = new URL('../public/data/github-stats.json', import.meta.url).href;
 
 function App() {
   const [stats, setStats] = useState<GitHubStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const {
-    filters, toggleTopic, toggleTag, toggleLanguage,
+    filters, toggleTag, toggleLanguage,
     setSearch, setSort, setLanguages, clearAll,
   } = useRepoFilters();
 
@@ -91,9 +91,13 @@ function App() {
           <CircularProgress />
         </Box>
       ) : (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-          <HeroSection profile={stats.profile} />
-          <AIPortfolioSummary narrative={stats.aiNarrative} />
+        <Container component="main" maxWidth="md" sx={{ py: 4 }}>
+          <HeroSection profile={stats.profile} name={stats.content?.name} intro={stats.content?.intro} />
+          <FeaturedProjects
+            featured={stats.content?.featured ?? []}
+            repos={stats.repos}
+            techTags={stats.techTags}
+          />
           <Suspense fallback={<ChartFallback height={260} />}>
             <TechTimeline repos={stats.repos} repoLanguages={stats.repoLanguages ?? {}} />
           </Suspense>
@@ -105,22 +109,28 @@ function App() {
               onToggleLanguage={toggleLanguage}
             />
           </Suspense>
-          <TechBadges repos={stats.repos} selected={filters.topics} onToggle={toggleTopic} />
-          <AITechInsights aiTechTags={stats.aiTechTags} selected={filters.tags} onToggle={toggleTag} />
+          <Technologies
+            techTags={stats.techTags}
+            groups={stats.content?.tagGroups ?? []}
+            selected={filters.tags}
+            onToggle={toggleTag}
+          />
           <RepoGrid
             repos={stats.repos}
-            aiTechTags={stats.aiTechTags}
+            techTags={stats.techTags}
             filters={filters}
             onSearchChange={setSearch}
             onSortChange={setSort}
             onLanguagesChange={setLanguages}
-            onToggleTopic={toggleTopic}
             onToggleTag={toggleTag}
             onClearAll={clearAll}
           />
-          <Box sx={{ textAlign: "center", py: 4, mt: 2, borderTop: 1, borderColor: "divider" }}>
+          <Box component="footer" sx={{ textAlign: "center", py: 4, mt: 2, borderTop: 1, borderColor: "divider" }}>
             <Typography variant="caption" color="text.secondary">
-              Last updated: {new Date(stats.fetchedAt).toLocaleDateString()} · Built with React + Vite + GitHub CLI
+              Repository data from the GitHub API, fetched {new Date(stats.fetchedAt).toLocaleDateString()} ·{" "}
+              <Link href={SOURCE_URL} target="_blank" rel="noopener noreferrer" color="inherit">
+                Source for this page
+              </Link>
             </Typography>
           </Box>
         </Container>

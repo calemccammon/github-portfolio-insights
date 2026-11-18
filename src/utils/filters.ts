@@ -12,7 +12,6 @@ export const SORT_LABELS: Record<SortKey, string> = {
 
 export interface RepoFilters {
   search: string;
-  topics: string[];
   tags: string[];
   languages: string[];
   sort: SortKey;
@@ -20,7 +19,6 @@ export interface RepoFilters {
 
 export const DEFAULT_FILTERS: RepoFilters = {
   search: "",
-  topics: [],
   tags: [],
   languages: [],
   sort: "recent",
@@ -30,7 +28,6 @@ export const DEFAULT_FILTERS: RepoFilters = {
 export function hasActiveFilters(f: RepoFilters): boolean {
   return (
     f.search.trim() !== "" ||
-    f.topics.length > 0 ||
     f.tags.length > 0 ||
     f.languages.length > 0
   );
@@ -41,15 +38,15 @@ export function toggleValue(list: string[], value: string): string[] {
 }
 
 /**
- * Topics and tags combine with AND, so each chip clicked narrows the results --
- * that is what makes them read as filters rather than as a search. Languages
+ * Tags combine with AND, so each chip clicked narrows the results -- that is
+ * what makes them read as filters rather than as a search. Languages
  * combine with OR instead, because a repo has exactly one primary language and
  * ANDing two of them could only ever return nothing.
  */
 export function filterRepos(
   repos: GitHubRepo[],
   filters: RepoFilters,
-  aiTechTags: Record<string, string[]> | null,
+  techTags: Record<string, string[]> | null,
 ): GitHubRepo[] {
   const needle = filters.search.trim().toLowerCase();
 
@@ -58,9 +55,7 @@ export function filterRepos(
       const haystack = `${repo.name} ${repo.description ?? ""}`.toLowerCase();
       if (!haystack.includes(needle)) return false;
     }
-    if (!filters.topics.every((t) => repo.topics.includes(t))) return false;
-
-    const tags = aiTechTags?.[repo.name] ?? [];
+    const tags = techTags?.[repo.name] ?? [];
     if (!filters.tags.every((t) => tags.includes(t))) return false;
 
     if (filters.languages.length > 0 && !filters.languages.includes(repo.language ?? "")) {
@@ -108,16 +103,14 @@ export function repoCountsByLanguage(repos: GitHubRepo[]): Record<string, number
 }
 
 /**
- * Multi-value params are comma-joined. No GitHub topic may contain a comma, and
- * the committed tech tags are checked against the same rule, so the separator
- * cannot collide with a value.
+ * Multi-value params are comma-joined. contentProblems rejects a tag that
+ * contains a comma, so the separator cannot collide with a value.
  */
 const SEP = ",";
 
 export function filtersToSearchParams(f: RepoFilters): URLSearchParams {
   const params = new URLSearchParams();
   if (f.search.trim()) params.set("q", f.search.trim());
-  if (f.topics.length) params.set("topic", f.topics.join(SEP));
   if (f.tags.length) params.set("tag", f.tags.join(SEP));
   if (f.languages.length) params.set("lang", f.languages.join(SEP));
   // Omitted when default, so an unfiltered view stays a clean, shareable URL.
@@ -135,7 +128,6 @@ export function filtersFromSearchParams(params: URLSearchParams): RepoFilters {
   const sort = params.get("sort");
   return {
     search: params.get("q") ?? "",
-    topics: list("topic"),
     tags: list("tag"),
     languages: list("lang"),
     sort: SORT_KEYS.includes(sort as SortKey) ? (sort as SortKey) : "recent",

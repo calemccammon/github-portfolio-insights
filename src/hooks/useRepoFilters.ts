@@ -10,7 +10,6 @@ import {
 
 export interface RepoFilterControls {
   filters: RepoFilters;
-  toggleTopic: (topic: string) => void;
   toggleTag: (tag: string) => void;
   toggleLanguage: (language: string) => void;
   setSearch: (search: string) => void;
@@ -36,10 +35,6 @@ export function useRepoFilters(): RepoFilterControls {
     window.history.replaceState(null, "", next);
   }, [filters]);
 
-  const toggleTopic = useCallback(
-    (topic: string) => setFilters((f) => ({ ...f, topics: toggleValue(f.topics, topic) })),
-    [],
-  );
   const toggleTag = useCallback(
     (tag: string) => setFilters((f) => ({ ...f, tags: toggleValue(f.tags, tag) })),
     [],
@@ -63,7 +58,6 @@ export function useRepoFilters(): RepoFilterControls {
 
   return {
     filters,
-    toggleTopic,
     toggleTag,
     toggleLanguage,
     setSearch,
