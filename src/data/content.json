@@ -20,7 +20,7 @@
       "points": [
         "Duplicate suppression is a UNIQUE constraint with INSERT ... ON CONFLICT DO NOTHING, so two overlapping poll runs cannot both send the same alert.",
         "Sign-in is GitHub OAuth with no scopes requested, and the database stores only a SHA-256 hash of each session token.",
-        "Webhook URLs come from users, so the service guards against SSRF: it rejects private addresses, re-checks the IP after DNS resolution, and does not follow redirects. 141 tests cover this and the rest, with the store tests running against a real Postgres."
+        "Webhook URLs come from users, so the service guards against SSRF: it rejects private addresses, re-checks the IP after DNS resolution, and does not follow redirects. 144 tests cover this and the rest, with the store tests running against a real Postgres."
       ],
       "links": []
     },
@@ -30,7 +30,7 @@
       "points": [
         "The domain logic is a separate pure-Dart package with no Flutter imports. Both APIs sit behind one repository class, so the UI never handles GraphQL or HTTP types.",
         "The rail and marine feeds share no identifier. The app joins them by pairing each train's final station with the nearest seaport that has port calls.",
-        "118 tests run with every external call mocked, and CI builds and deploys the web version."
+        "122 tests run with every external call mocked, and CI builds and deploys the web version."
       ],
       "links": [
         {
