@@ -2,7 +2,7 @@
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
   "updatedAt": "2026-11-17",
   "name": "Cale McCammon",
-  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, batch and streaming data pipelines, a benchmark for text-to-SQL models, and mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
+  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, batch and streaming data pipelines, a benchmark for text-to-SQL models, and mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nFour are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
     {
       "repo": "k2l",
@@ -10,17 +10,17 @@
       "points": [
         "Parsing and type checking go through the Kotlin Analysis API. Kotlin that k2l cannot translate is a compile error.",
         "The output needs no third-party Lua code. The compiler copies in only the parts of its own Lua runtime that a program uses.",
-        "More than 250 golden test programs are compiled and run on all five Lua interpreters in CI."
+        "252 golden test programs are compiled and run on all five Lua interpreters in CI, and ten more cases check the compiler's error messages."
       ],
       "links": []
     },
     {
       "repo": "freight-alerts",
-      "summary": "Delay alerts for Finnish cargo rail. A Go service over Postgres polls an open rail API on a schedule and notifies once per late train per day, however many polls see the delay.",
+      "summary": "Delay alerts for Finnish cargo rail. A Go service over Postgres polls an open rail API on a schedule and sends one alert per watch rule, train and day, however many polls see the delay.",
       "points": [
         "Duplicate suppression is a UNIQUE constraint with INSERT ... ON CONFLICT DO NOTHING, so two overlapping poll runs cannot both send the same alert.",
-        "Sign-in is GitHub OAuth, and the database stores only a SHA-256 hash of each session token.",
-        "Webhook URLs come from users, so the service guards against SSRF: it rejects private addresses, re-checks the IP after DNS resolution, and does not follow redirects."
+        "Sign-in is GitHub OAuth with no scopes requested, and the database stores only a SHA-256 hash of each session token.",
+        "Webhook URLs come from users, so the service guards against SSRF: it rejects private addresses, re-checks the IP after DNS resolution, and does not follow redirects. 141 tests cover this and the rest, with the store tests running against a real Postgres."
       ],
       "links": []
     },
@@ -33,7 +33,10 @@
         "118 tests run with every external call mocked, and CI builds and deploys the web version."
       ],
       "links": [
-        { "label": "Live demo", "url": "https://calemccammon.github.io/flutter-freight-corridor/" }
+        {
+          "label": "Live demo",
+          "url": "https://calemccammon.github.io/flutter-freight-corridor/"
+        }
       ]
     },
     {
@@ -41,137 +44,94 @@
       "summary": "A benchmark for text-to-SQL models. It runs each generated query against a fixed DuckDB warehouse and compares the rows with the reference query's rows, so differently written but correct SQL still passes.",
       "points": [
         "The comparison rules are documented and tested: row order counts only when the reference query has a top-level ORDER BY, rows compare as a multiset, and floats compare within a tolerance.",
-        "Generated SQL is treated as untrusted input. Only a single read statement is allowed, and it runs in an in-memory database with file access off and a 15-second timeout.",
+        "Generated SQL is treated as untrusted input. It runs in an in-memory DuckDB with external access disabled and a 15-second timeout, and wrong answers are sorted into failure classes such as unknown column, wrong shape and wrong order.",
         "In the committed run, llama3.2 answered 22 of 72 questions correctly. With table names but no column names in the prompt it answered 1 of 24, and 56% of all failures were unknown-column errors."
       ],
       "links": [
-        { "label": "Results", "url": "https://github.com/calemccammon/text-to-sql-evals/blob/main/REPORT.md" }
-      ]
-    },
-    {
-      "repo": "data-engineer-finance-analytics",
-      "summary": "An ELT pipeline for stock prices and macroeconomic indicators. It loads Yahoo Finance and FRED data into DuckDB or BigQuery, models it with dbt, schedules it with Dagster, and publishes an Evidence dashboard.",
-      "points": [
-        "The dbt project has staging, intermediate and mart layers ending in a star schema, with custom SQL tests and source freshness checks.",
-        "The same pipeline runs on DuckDB locally and on BigQuery in the cloud. One environment variable selects the target.",
-        "The dashboard carries a market briefing written by Gemini. Every figure in it is checked against the source data first, and a briefing that fails the check is retried once and then withheld."
-      ],
-      "links": [
-        { "label": "Dashboard", "url": "https://calemccammon.github.io/data-engineer-finance-analytics/" }
-      ]
-    },
-    {
-      "repo": "data-engineer-wiki-streams",
-      "summary": "A Kafka Streams application in Kotlin that aggregates the live stream of Wikipedia edits and serves the results over a REST API.",
-      "points": [
-        "It keeps three aggregations: edits per wiki in one-minute tumbling windows, the most-edited pages in five-minute hopping windows, and a running ratio of bot to human edits.",
-        "The API reads the application's own RocksDB state stores through interactive queries, so there is no separate database.",
-        "The topologies are unit-tested with TopologyTestDriver, which needs no running broker."
-      ],
-      "links": [
-        { "label": "API docs", "url": "https://calemccammon.github.io/data-engineer-wiki-streams/" }
+        {
+          "label": "Results",
+          "url": "https://github.com/calemccammon/text-to-sql-evals/blob/main/REPORT.md"
+        }
       ]
     }
   ],
   "tagGroups": [
     {
       "label": "Data",
-      "tags": [
-        "dbt", "Dagster", "Airflow", "Kafka", "Kafka Streams", "Redpanda", "DuckDB", "BigQuery",
-        "PostgreSQL", "MySQL", "Parquet", "RocksDB", "Medallion Architecture", "Star Schema",
-        "Pydantic", "Evidence", "Metabase", "Streamlit"
-      ]
+      "tags": ["dbt", "Dagster", "Airflow", "Kafka", "Kafka Streams", "Redpanda", "DuckDB", "BigQuery", "PostgreSQL", "MySQL", "Parquet", "RocksDB", "Medallion Architecture", "Star Schema", "Pydantic", "Evidence", "Metabase", "Streamlit"]
     },
     {
       "label": "Backend",
-      "tags": [
-        "REST API", "GraphQL", "OpenAPI", "Spring Boot", "Ktor", "ASP.NET Core", "J2EE", "Tomcat",
-        "OAuth", "Webhooks", "WebSockets", "Server-Sent Events", "Idempotency", "SSRF Defence"
-      ]
+      "tags": ["REST API", "GraphQL", "OpenAPI", "Spring Boot", "Ktor", "ASP.NET Core", "J2EE", "Tomcat", "OAuth", "Webhooks", "WebSockets", "Server-Sent Events", "Idempotency", "SSRF Defence"]
     },
     {
       "label": "Mobile and UI",
       "tags": [
-        "Android", "Jetpack Compose", "Hilt", "Coroutines", "Retrofit", "Data Binding", "MVI",
-        "Kotlin Multiplatform", "Compose Multiplatform", "Flutter", "Riverpod", "go_router",
-        "flutter_map", "React Native", "Expo", "React Navigation", "TanStack Query", "Zustand",
-        "React", "Vite", "Material UI", "Chart.js", "Fyne", "NiceGUI", "Swing", "ratatui",
-        "Terminal UI", "Chrome Extension"
+        "Android",
+        "Jetpack Compose",
+        "Hilt",
+        "Coroutines",
+        "Retrofit",
+        "Data Binding",
+        "MVI",
+        "Kotlin Multiplatform",
+        "Compose Multiplatform",
+        "Flutter",
+        "Riverpod",
+        "go_router",
+        "flutter_map",
+        "React Native",
+        "Expo",
+        "React Navigation",
+        "TanStack Query",
+        "Zustand",
+        "React",
+        "Vite",
+        "Material UI",
+        "Chart.js",
+        "Fyne",
+        "NiceGUI",
+        "Swing",
+        "ratatui",
+        "Terminal UI",
+        "Chrome Extension"
       ]
     },
     {
       "label": "AI",
-      "tags": [
-        "LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API", "Prompt Caching"
-      ]
+      "tags": ["LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API"]
     },
     {
       "label": "Compilers and tools",
-      "tags": [
-        "Compiler", "Kotlin Analysis API", "Source Maps", "Gradle Plugin", "Scapy", "NVML", "ADB"
-      ]
+      "tags": ["Compiler", "Kotlin Analysis API", "Source Maps", "Gradle Plugin", "Scapy", "NVML", "ADB"]
     },
     {
       "label": "Testing and delivery",
-      "tags": [
-        "GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS",
-        "pytest", "Jest", "Vitest", "Playwright", "Maestro", "Golden Tests"
-      ]
+      "tags": ["GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS", "pytest", "Jest", "Vitest", "Playwright", "Maestro", "Golden Tests"]
     }
   ],
   "techTags": {
     "apkloader": ["Swing", "ADB"],
     "contact-j2ee-aws": ["J2EE", "Tomcat", "MySQL", "AWS"],
-    "data-engineer-crypto-streaming": [
-      "Kafka", "Redpanda", "Medallion Architecture", "dbt", "Dagster", "DuckDB", "Parquet",
-      "Pydantic", "Streamlit", "WebSockets", "GitHub Actions"
-    ],
-    "data-engineer-earthquake-pipeline": [
-      "Airflow", "dbt", "PostgreSQL", "Metabase", "Docker Compose", "GitHub Actions", "GitHub Pages"
-    ],
-    "data-engineer-finance-analytics": [
-      "dbt", "Dagster", "DuckDB", "BigQuery", "Star Schema", "Evidence", "Gemini API", "Playwright",
-      "pytest", "GitHub Actions", "GitHub Pages"
-    ],
-    "data-engineer-wiki-streams": [
-      "Kafka Streams", "Kafka", "Redpanda", "RocksDB", "Ktor", "Server-Sent Events", "OpenAPI",
-      "GitHub Actions", "GitHub Pages"
-    ],
-    "finance-analytics-java-springboot": [
-      "Spring Boot", "BigQuery", "REST API", "OpenAPI", "Docker", "Kubernetes", "GitHub Actions",
-      "GitHub Pages"
-    ],
-    "flutter-freight-corridor": [
-      "Flutter", "Riverpod", "GraphQL", "REST API", "go_router", "flutter_map", "GitHub Actions",
-      "GitHub Pages"
-    ],
-    "freight-alerts": [
-      "PostgreSQL", "REST API", "OAuth", "Webhooks", "Idempotency", "SSRF Defence", "Docker",
-      "Cloud Run", "GitHub Actions"
-    ],
-    "github-portfolio-insights": [
-      "React", "Vite", "Material UI", "Chart.js", "Vitest", "GitHub Actions", "GitHub Pages"
-    ],
+    "data-engineer-crypto-streaming": ["Kafka", "Redpanda", "Medallion Architecture", "dbt", "Dagster", "DuckDB", "Parquet", "Pydantic", "Streamlit", "WebSockets", "GitHub Actions"],
+    "data-engineer-earthquake-pipeline": ["Airflow", "dbt", "PostgreSQL", "Metabase", "Docker Compose", "GitHub Actions", "GitHub Pages"],
+    "data-engineer-finance-analytics": ["dbt", "Dagster", "DuckDB", "BigQuery", "Star Schema", "Evidence", "Gemini API", "Playwright", "pytest", "GitHub Actions", "GitHub Pages"],
+    "data-engineer-wiki-streams": ["Kafka Streams", "Kafka", "Redpanda", "RocksDB", "Ktor", "Server-Sent Events", "OpenAPI", "GitHub Actions", "GitHub Pages"],
+    "finance-analytics-java-springboot": ["Spring Boot", "BigQuery", "REST API", "OpenAPI", "Docker", "Kubernetes", "GitHub Actions", "GitHub Pages"],
+    "flutter-freight-corridor": ["Flutter", "Riverpod", "GraphQL", "REST API", "go_router", "flutter_map", "GitHub Actions", "GitHub Pages"],
+    "freight-alerts": ["PostgreSQL", "REST API", "OAuth", "Webhooks", "Idempotency", "SSRF Defence", "Docker", "Cloud Run", "GitHub Actions"],
+    "github-portfolio-insights": ["React", "Vite", "Material UI", "Chart.js", "Vitest", "GitHub Actions", "GitHub Pages"],
     "go-chatbot": ["Fyne", "OpenAI-compatible API", "GitHub Actions"],
     "jeopardy-android": ["Android"],
     "jeopardy-android-v2": ["Android", "Jetpack Compose", "Hilt", "Coroutines", "Retrofit", "MVI"],
     "jeopardy-kotlin": ["Android", "Data Binding"],
     "jeopardy-web-app": ["J2EE"],
-    "k2l": [
-      "Compiler", "Kotlin Analysis API", "Source Maps", "Golden Tests", "Gradle Plugin",
-      "GitHub Actions"
-    ],
+    "k2l": ["Compiler", "Kotlin Analysis API", "Source Maps", "Golden Tests", "Gradle Plugin", "GitHub Actions"],
     "kmp-trivia": ["Kotlin Multiplatform", "Compose Multiplatform", "MVI"],
     "python-shark": ["NiceGUI", "Scapy", "pytest", "GitHub Actions"],
-    "react-native-energy-insights": [
-      "React Native", "Expo", "React Navigation", "TanStack Query", "Zustand", "Jest", "Maestro",
-      "GitHub Actions"
-    ],
+    "react-native-energy-insights": ["React Native", "Expo", "React Navigation", "TanStack Query", "Zustand", "Jest", "Maestro", "GitHub Actions"],
     "rust-monitor": ["ratatui", "Terminal UI", "NVML", "GitHub Actions"],
-    "text-to-sql-evals": [
-      "LLM Evals", "DuckDB", "Anthropic SDK", "Ollama", "Prompt Caching", "Parquet", "pytest",
-      "GitHub Actions"
-    ],
+    "text-to-sql-evals": ["LLM Evals", "DuckDB", "Anthropic SDK", "Ollama", "Parquet", "pytest", "GitHub Actions"],
     "trivia-web-api": ["ASP.NET Core", "REST API"],
     "url-share-chrome-extension": ["Chrome Extension"]
   }
