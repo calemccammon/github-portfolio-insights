@@ -41,11 +41,11 @@ describe('filterRepos', () => {
       .toEqual(['delta']);
   });
 
-  it('narrows as topics are added -- topics combine with AND', () => {
-    const one = filterRepos(REPOS, { ...DEFAULT_FILTERS, topics: ['kafka'] }, TAGS);
+  it('narrows as tags are added -- tags combine with AND', () => {
+    const one = filterRepos(REPOS, { ...DEFAULT_FILTERS, tags: ['KTables'] }, TAGS);
     expect(one.map((r) => r.name)).toEqual(['beta', 'gamma']);
 
-    const two = filterRepos(REPOS, { ...DEFAULT_FILTERS, topics: ['kafka', 'streaming'] }, TAGS);
+    const two = filterRepos(REPOS, { ...DEFAULT_FILTERS, tags: ['KTables', 'Ktor'] }, TAGS);
     expect(two.map((r) => r.name)).toEqual(['beta']);
   });
 
@@ -69,19 +69,19 @@ describe('filterRepos', () => {
       .toEqual(['alpha']);
   });
 
-  it('treats every repo as untagged when aiTechTags is null', () => {
+  it('treats every repo as untagged when techTags is null', () => {
     expect(filterRepos(REPOS, { ...DEFAULT_FILTERS, tags: ['KTables'] }, null)).toHaveLength(0);
   });
 
   it('combines different facets with AND', () => {
     const result = filterRepos(
-      REPOS, { ...DEFAULT_FILTERS, topics: ['kafka'], languages: ['Kotlin'], search: 'trivia' }, TAGS,
+      REPOS, { ...DEFAULT_FILTERS, tags: ['KTables'], languages: ['Kotlin'], search: 'trivia' }, TAGS,
     );
     expect(result.map((r) => r.name)).toEqual(['gamma']);
   });
 
   it('can legitimately return nothing', () => {
-    expect(filterRepos(REPOS, { ...DEFAULT_FILTERS, topics: ['flutter', 'kafka'] }, TAGS)).toHaveLength(0);
+    expect(filterRepos(REPOS, { ...DEFAULT_FILTERS, tags: ['Riverpod', 'KTables'] }, TAGS)).toHaveLength(0);
   });
 });
 
@@ -144,7 +144,7 @@ describe('URL round-tripping', () => {
 
   it('round-trips every facet', () => {
     const filters = {
-      search: 'kafka', topics: ['streaming', 'kafka'], tags: ['KTables', 'GraphQL Codegen'],
+      search: 'kafka', tags: ['KTables', 'GraphQL Codegen'],
       languages: ['Kotlin'], sort: 'stars' as const,
     };
     expect(filtersFromSearchParams(filtersToSearchParams(filters))).toEqual(filters);
@@ -160,7 +160,7 @@ describe('URL round-tripping', () => {
   });
 
   it('ignores empty entries in a comma-separated list', () => {
-    expect(filtersFromSearchParams(new URLSearchParams('topic=kafka,,')).topics).toEqual(['kafka']);
+    expect(filtersFromSearchParams(new URLSearchParams('tag=Kafka,,')).tags).toEqual(['Kafka']);
   });
 
   it('reads an empty query string as the defaults', () => {

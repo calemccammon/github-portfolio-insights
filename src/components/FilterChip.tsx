@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * A chip in the Topics or Patterns cloud. Selecting one filters the repository
+ * A chip in the Technologies section. Selecting one filters the repository
  * grid below, so it has to read as a control rather than as decoration: MUI
  * gives it button semantics via onClick, and aria-pressed carries the selected
  * state to assistive tech, which the fill colour alone would not.
@@ -45,7 +45,7 @@ export function FilterChip({ label, count, repoNames, selected, onToggle }: Prop
             : {
                 borderColor: "#30363d",
                 color: "text.primary",
-                // A frequently-used topic keeps its subtle tint when unselected;
+                // A frequently-used tag keeps its subtle tint when unselected;
                 // once selected the solid primary fill takes over entirely.
                 backgroundColor: frequent ? "#58a6ff22" : "transparent",
                 "&:hover": { backgroundColor: "#58a6ff33" },

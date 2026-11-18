@@ -1,17 +1,16 @@
 #!/usr/bin/env tsx
 /**
  * Fetch GitHub data for calemccammon using the GitHub CLI (`gh api`) and merge
- * in the committed AI-authored content. Writes public/data/github-stats.json
- * for Vite to bundle.
+ * in the hand-written page content. Writes public/data/github-stats.json for
+ * Vite to bundle.
  *
  * Local / CI: requires only the GitHub CLI (`gh auth login`, or GITHUB_TOKEN
- * in Actions). No model provider, no API key, no per-build inference cost.
+ * in Actions).
  *
- * The narrative and per-repo tech tags live in src/data/ai-content.json. They
- * were written by Claude with the repository list, descriptions, topics and
- * READMEs in context, then reviewed and committed -- they are not generated at
- * build time. They only need refreshing when the portfolio itself changes,
- * which is far less often than this script runs.
+ * The introduction, featured project write-ups and per-repo tags live in
+ * src/data/content.json, and src/data/README.md is the guide for writing them.
+ * They are committed, not generated at build time: they change only when the
+ * repositories do, which is far less often than this script runs.
  *
  * Usage: npx tsx scripts/fetch-github-data.ts
  */
@@ -19,7 +18,10 @@
 import { execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { GitHubProfile, GitHubRepo, RepoLanguages, GitHubStats } from '../src/types/github.ts';
+import type {
+  GitHubProfile, GitHubRepo, RepoLanguages, GitHubStats, PageContent, PortfolioContent,
+} from '../src/types/github.ts';
+import { contentProblems } from '../src/utils/content.ts';
 
 const USERNAME = 'calemccammon';
 
@@ -28,24 +30,26 @@ function gh(endpoint: string): unknown {
   return JSON.parse(out);
 }
 
-interface AIContent {
-  narrative: string;
-  techTags: Record<string, string[]>;
-}
-
 /**
- * Reads the committed AI content. A missing or malformed file degrades to
- * empty rather than failing the build -- the dashboard renders without those
- * two sections instead of the deploy going red.
+ * Reads the committed page content. A missing or unparseable file degrades to
+ * null rather than failing the build -- the dashboard renders without the
+ * hand-written sections instead of the deploy going red. Rule violations are
+ * only warned about here; the test suite is what blocks a bad edit.
  */
-function readAIContent(): AIContent | null {
-  const path = join(import.meta.dirname ?? process.cwd(), '..', 'src', 'data', 'ai-content.json');
+function readContent(): PortfolioContent | null {
+  const path = join(import.meta.dirname ?? process.cwd(), '..', 'src', 'data', 'content.json');
   try {
-    const parsed = JSON.parse(readFileSync(path, 'utf8')) as Partial<AIContent>;
-    if (!parsed.narrative || !parsed.techTags) throw new Error('missing narrative or techTags');
-    return { narrative: parsed.narrative, techTags: parsed.techTags };
+    const parsed = JSON.parse(readFileSync(path, 'utf8')) as Partial<PortfolioContent>;
+    for (const problem of contentProblems(parsed)) console.warn(`Warning: content.json: ${problem}`);
+    return {
+      name: parsed.name,
+      intro: parsed.intro ?? '',
+      featured: parsed.featured ?? [],
+      tagGroups: parsed.tagGroups ?? [],
+      techTags: parsed.techTags ?? {},
+    };
   } catch (err) {
-    console.warn('Warning: AI content unavailable:', (err as Error).message);
+    console.warn('Warning: page content unavailable:', (err as Error).message);
     return null;
   }
 }
@@ -66,7 +70,7 @@ function tagsForLiveRepos(
 
   const untagged = repos.filter((r) => !matched[r.name]).map((r) => r.name);
   if (untagged.length > 0) {
-    console.warn(`Note: no committed tech tags for ${untagged.length} repo(s): ${untagged.join(', ')}`);
+    console.warn(`Note: no tags in content.json for ${untagged.length} repo(s): ${untagged.join(', ')}`);
   }
   return matched;
 }
@@ -93,19 +97,33 @@ for (const repo of ownRepos) {
   }
 }
 
-console.log('Reading committed AI content...');
-const aiContent = readAIContent();
-const aiNarrative = aiContent?.narrative ?? null;
-const aiTechTags = aiContent ? tagsForLiveRepos(aiContent.techTags, ownRepos) : null;
-if (aiTechTags) console.log(`AI tech tags matched for ${Object.keys(aiTechTags).length} repos`);
+console.log('Reading committed page content...');
+const committed = readContent();
+const techTags = committed ? tagsForLiveRepos(committed.techTags, ownRepos) : null;
+if (techTags) console.log(`Tags matched for ${Object.keys(techTags).length} repos`);
+
+let content: PageContent | null = null;
+if (committed) {
+  const live = new Set(ownRepos.map((r) => r.name));
+  const missing = committed.featured.filter((f) => !live.has(f.repo)).map((f) => f.repo);
+  if (missing.length > 0) {
+    console.warn(`Note: featured repo(s) not found on GitHub and left out: ${missing.join(', ')}`);
+  }
+  content = {
+    name: committed.name,
+    intro: committed.intro,
+    featured: committed.featured.filter((f) => live.has(f.repo)),
+    tagGroups: committed.tagGroups,
+  };
+}
 
 const stats: GitHubStats = {
   profile,
   repos: ownRepos,
   languages: aggregatedLanguages,
   repoLanguages,
-  aiNarrative,
-  aiTechTags,
+  content,
+  techTags,
   fetchedAt: new Date().toISOString(),
 };
 

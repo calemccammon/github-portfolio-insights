@@ -22,14 +22,14 @@ const REPOS = [
 
 const NOOP = {
   onSearchChange: () => {}, onSortChange: () => {}, onLanguagesChange: () => {},
-  onToggleTopic: () => {}, onToggleTag: () => {}, onClearAll: () => {},
+  onToggleTag: () => {}, onClearAll: () => {},
 };
 
 function render(filters: Partial<RepoFilters> = {}, overrides = {}) {
   return renderWithTheme(
     <RepoGrid
       repos={REPOS}
-      aiTechTags={{ alpha: ['Riverpod'] }}
+      techTags={{ alpha: ['Riverpod'], beta: ['Kafka Streams'] }}
       filters={{ ...DEFAULT_FILTERS, ...filters }}
       {...NOOP}
       {...overrides}
@@ -45,17 +45,22 @@ describe('RepoGrid', () => {
   });
 
   it('narrows the grid and shows a "n of m" count when filtered', () => {
-    render({ topics: ['kafka'] });
+    render({ tags: ['Kafka Streams'] });
     expect(screen.getByText('(1 of 2)')).toBeInTheDocument();
     expect(screen.getByText('beta')).toBeInTheDocument();
     expect(screen.queryByText('alpha')).not.toBeInTheDocument();
   });
 
+  it('shows each repository\'s tags on its card', () => {
+    render();
+    expect(screen.getByText('Riverpod')).toBeInTheDocument();
+    expect(screen.getByText('Kafka Streams')).toBeInTheDocument();
+  });
+
   it('renders a removable chip for each active filter', () => {
-    render({ topics: ['kafka'], tags: ['Riverpod'], languages: ['Dart'], search: 'alpha' });
+    render({ tags: ['Riverpod'], languages: ['Dart'], search: 'alpha' });
     // Scoped to the filter bar: "Dart" also appears as the Language select's value.
     const bar = within(screen.getByRole('group', { name: 'Active filters' }));
-    expect(bar.getByText('Kafka')).toBeInTheDocument();      // slug is humanised
     expect(bar.getByText('Riverpod')).toBeInTheDocument();
     expect(bar.getByText('Dart')).toBeInTheDocument();
     expect(bar.getByText('"alpha"')).toBeInTheDocument();
@@ -63,7 +68,7 @@ describe('RepoGrid', () => {
 
   it('offers a way out when filters match nothing', async () => {
     const onClearAll = vi.fn();
-    render({ topics: ['kafka'], languages: ['Dart'] }, { onClearAll });
+    render({ tags: ['Kafka Streams'], languages: ['Dart'] }, { onClearAll });
 
     expect(screen.getByText('No repositories match these filters.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Clear all filters' }));

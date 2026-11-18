@@ -103,11 +103,11 @@ export function LanguageChart({ languages, repos, selected, onToggleLanguage }: 
         }}
       >
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>Language Distribution</Typography>
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>Language distribution</Typography>
           <Typography variant="body2" color="text.secondary">
             {lens === "bytes"
-              ? "Bytes of code per language — click a slice to filter"
-              : "Repositories per primary language — click a slice to filter"}
+              ? "Bytes of code per language. Select a slice to filter the repositories below."
+              : "Repositories per primary language. Select a slice to filter the repositories below."}
           </Typography>
         </Box>
         <ToggleButtonGroup
@@ -127,8 +127,8 @@ export function LanguageChart({ languages, repos, selected, onToggleLanguage }: 
         </Box>
       </Paper>
       <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-        Byte counts reward verbose languages and large generated or vendored files; the
-        per-repository count weights every project equally. Neither is the whole picture.
+        Byte counts favour verbose languages and generated or vendored files. The per-repository
+        count weights every project equally.
       </Typography>
     </Box>
   );
