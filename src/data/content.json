@@ -2,7 +2,7 @@
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
   "updatedAt": "2026-11-21",
   "name": "Cale McCammon",
-  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, one weather app built six times in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nFive are described below. The rest are in the repository list at the bottom of the page.",
+  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, one weather app built six times in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
     {
       "repo": "k2l",
@@ -15,6 +15,31 @@
       "links": []
     },
     {
+      "repo": "kmp-weather",
+      "summary": "A weather app in Kotlin Multiplatform with a map, place search and a weekly forecast. One Compose Multiplatform screen runs on Android, the desktop and the web. It is one of six builds of the same app; the others are in Flutter, React Native, .NET MAUI with Blazor, Ionic with Angular, and Vue with Capacitor.",
+      "points": [
+        "Domain, data and UI are separate layers, and a test reads every source file's imports and fails on one that crosses them the wrong way.",
+        "State is held in two androidx ViewModels, each exposing one StateFlow. A search or forecast request that has been overtaken is cancelled, so an old answer cannot replace a newer one.",
+        "The view models hand the screen string resources, not text, so they are tested without Compose. The screen is tested by drawing it in a window that is never shown, and CI builds the Android, desktop and web apps."
+      ],
+      "links": [
+        {
+          "label": "Live demo",
+          "url": "https://calemccammon.github.io/kmp-weather/"
+        }
+      ]
+    },
+    {
+      "repo": "data-engineer-crypto-streaming",
+      "summary": "A streaming pipeline for live crypto trades. A producer reads the Binance.US WebSocket into Redpanda, a consumer lands the trades as Parquet, and DuckDB builds one-minute candles that dbt turns into incremental gold tables. Dagster runs the batch steps.",
+      "points": [
+        "Kafka offsets are committed only after the trades they cover are in a Parquet file, and each file is written under a temporary name and then renamed. A killed consumer re-reads what it had not flushed, and the next stage never reads part of a file.",
+        "Late trades are handled by re-reading a trailing 90-second window, rounded down to the minute because candles are replaced whole. The watermark is kept per symbol, so a symbol whose backlog arrives behind another's is not passed over.",
+        "The rolling-window dbt models compute their windows over every candle and filter afterwards, so a re-emitted row never gets a shortened window. One test builds silver and gold from Parquet files through the Dagster assets, which puts every dbt model and test in CI."
+      ],
+      "links": []
+    },
+    {
       "repo": "freight-alerts",
       "summary": "Delay alerts for Finnish cargo rail. A Go service over Postgres polls an open rail API on a schedule and sends one alert per watch rule, train and day, however many polls see the delay.",
       "points": [
@@ -23,21 +48,6 @@
         "Webhook URLs come from users, so the service guards against SSRF: it rejects private addresses, re-checks the IP after DNS resolution, and does not follow redirects. 144 tests cover this and the rest, with the store tests running against a real Postgres."
       ],
       "links": []
-    },
-    {
-      "repo": "flutter-freight-corridor",
-      "summary": "A Flutter app for Android and the web that shows live Finnish freight traffic: cargo trains from a GraphQL API, vessels and port calls from a REST API.",
-      "points": [
-        "The domain logic is a separate pure-Dart package with no Flutter imports. Both APIs sit behind one repository class, so the UI never handles GraphQL or HTTP types.",
-        "The rail and marine feeds share no identifier. The app joins them by pairing each train's final station with the nearest seaport that has port calls.",
-        "122 tests run with every external call mocked, and CI builds and deploys the web version."
-      ],
-      "links": [
-        {
-          "label": "Live demo",
-          "url": "https://calemccammon.github.io/flutter-freight-corridor/"
-        }
-      ]
     },
     {
       "repo": "text-to-sql-evals",
@@ -55,17 +65,17 @@
       ]
     },
     {
-      "repo": "maui-weather",
-      "summary": "A weather app with a map, place search and a weekly forecast, written in C# with two front ends: .NET MAUI for Android and Blazor WebAssembly for the browser. It is one of six builds of the same app, the others in Flutter, React Native, Kotlin Multiplatform, Ionic with Angular, and Vue with Capacitor.",
+      "repo": "flutter-freight-corridor",
+      "summary": "A Flutter app for Android and the web that shows live Finnish freight traffic: cargo trains from a GraphQL API, vessels and port calls from a REST API.",
       "points": [
-        "The domain, data and presentation layers are separate projects, so the compiler holds each layer to its rule: a project can only use what it references.",
-        "The Blazor front end was added without changing those three projects. Its page listens to the same two view models the MAUI app binds to, and draws itself again when they change.",
-        "A search or forecast request that has been overtaken is cancelled, and its answer is ignored if it arrives anyway. The view models are tested with xUnit and the Razor components with bUnit, and CI builds the Android app and the web app."
+        "The domain logic is a separate pure-Dart package with no Flutter imports. Both APIs sit behind one repository class, so the UI never handles GraphQL or HTTP types.",
+        "The rail and marine feeds share no identifier. The app joins them by pairing each train's final station with the nearest seaport that has port calls.",
+        "122 tests run with every external call mocked, and CI builds and deploys the web version."
       ],
       "links": [
         {
           "label": "Live demo",
-          "url": "https://calemccammon.github.io/maui-weather/"
+          "url": "https://calemccammon.github.io/flutter-freight-corridor/"
         }
       ]
     }
