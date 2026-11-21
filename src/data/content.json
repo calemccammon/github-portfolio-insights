@@ -1,8 +1,8 @@
 {
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
-  "updatedAt": "2026-11-17",
+  "updatedAt": "2026-11-21",
   "name": "Cale McCammon",
-  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, batch and streaming data pipelines, a benchmark for text-to-SQL models, and mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nFour are described below. The rest are in the repository list at the bottom of the page.",
+  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, one weather app built six times in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nFive are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
     {
       "repo": "k2l",
@@ -53,6 +53,21 @@
           "url": "https://github.com/calemccammon/text-to-sql-evals/blob/main/REPORT.md"
         }
       ]
+    },
+    {
+      "repo": "maui-weather",
+      "summary": "A weather app with a map, place search and a weekly forecast, written in C# with two front ends: .NET MAUI for Android and Blazor WebAssembly for the browser. It is one of six builds of the same app, the others in Flutter, React Native, Kotlin Multiplatform, Ionic with Angular, and Vue with Capacitor.",
+      "points": [
+        "The domain, data and presentation layers are separate projects, so the compiler holds each layer to its rule: a project can only use what it references.",
+        "The Blazor front end was added without changing those three projects. Its page listens to the same two view models the MAUI app binds to, and draws itself again when they change.",
+        "A search or forecast request that has been overtaken is cancelled, and its answer is ignored if it arrives anyway. The view models are tested with xUnit and the Razor components with bUnit, and CI builds the Android app and the web app."
+      ],
+      "links": [
+        {
+          "label": "Live demo",
+          "url": "https://calemccammon.github.io/maui-weather/"
+        }
+      ]
     }
   ],
   "tagGroups": [
@@ -76,6 +91,7 @@
         "MVI",
         "Kotlin Multiplatform",
         "Compose Multiplatform",
+        "Koin",
         "Flutter",
         "Riverpod",
         "go_router",
@@ -85,6 +101,17 @@
         "React Navigation",
         "TanStack Query",
         "Zustand",
+        ".NET MAUI",
+        "Blazor",
+        "MVVM",
+        "Ionic",
+        "Angular",
+        "Capacitor",
+        "Vue",
+        "Pinia",
+        "MapLibre",
+        "Material Design",
+        "Clean Architecture",
         "React",
         "Vite",
         "Material UI",
@@ -107,11 +134,12 @@
     },
     {
       "label": "Testing and delivery",
-      "tags": ["GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS", "pytest", "Jest", "Vitest", "Playwright", "Maestro", "Golden Tests"]
+      "tags": ["GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS", "pytest", "Jest", "Vitest", "xUnit", "bUnit", "Playwright", "Maestro", "Golden Tests"]
     }
   ],
   "techTags": {
     "apkloader": ["Swing", "ADB"],
+    "capacitor-weather": ["Vue", "Capacitor", "Pinia", "MapLibre", "Clean Architecture", "Material Design", "Vite", "Vitest", "Playwright", "GitHub Actions", "GitHub Pages"],
     "contact-j2ee-aws": ["J2EE", "Tomcat", "MySQL", "AWS"],
     "data-engineer-crypto-streaming": ["Kafka", "Redpanda", "Medallion Architecture", "dbt", "Dagster", "DuckDB", "Parquet", "Pydantic", "Streamlit", "WebSockets", "GitHub Actions"],
     "data-engineer-earthquake-pipeline": ["Airflow", "dbt", "PostgreSQL", "Metabase", "Docker Compose", "GitHub Actions", "GitHub Pages"],
@@ -119,17 +147,22 @@
     "data-engineer-wiki-streams": ["Kafka Streams", "Kafka", "Redpanda", "RocksDB", "Ktor", "Server-Sent Events", "OpenAPI", "GitHub Actions", "GitHub Pages"],
     "finance-analytics-java-springboot": ["Spring Boot", "BigQuery", "REST API", "OpenAPI", "Docker", "Kubernetes", "GitHub Actions", "GitHub Pages"],
     "flutter-freight-corridor": ["Flutter", "Riverpod", "GraphQL", "REST API", "go_router", "flutter_map", "GitHub Actions", "GitHub Pages"],
+    "flutter-weather": ["Flutter", "Riverpod", "flutter_map", "Clean Architecture", "Material Design", "GitHub Actions", "GitHub Pages"],
     "freight-alerts": ["PostgreSQL", "REST API", "OAuth", "Webhooks", "Idempotency", "SSRF Defence", "Docker", "Cloud Run", "GitHub Actions"],
     "github-portfolio-insights": ["React", "Vite", "Material UI", "Chart.js", "Vitest", "GitHub Actions", "GitHub Pages"],
     "go-chatbot": ["Fyne", "OpenAI-compatible API", "GitHub Actions"],
+    "ionic-weather": ["Ionic", "Angular", "Capacitor", "MapLibre", "Clean Architecture", "Vitest", "Playwright", "GitHub Actions", "GitHub Pages"],
     "jeopardy-android": ["Android"],
     "jeopardy-android-v2": ["Android", "Jetpack Compose", "Hilt", "Coroutines", "Retrofit", "MVI"],
     "jeopardy-kotlin": ["Android", "Data Binding"],
     "jeopardy-web-app": ["J2EE"],
     "k2l": ["Compiler", "Kotlin Analysis API", "Source Maps", "Golden Tests", "Gradle Plugin", "GitHub Actions"],
     "kmp-trivia": ["Kotlin Multiplatform", "Compose Multiplatform", "MVI"],
+    "kmp-weather": ["Kotlin Multiplatform", "Compose Multiplatform", "Koin", "MapLibre", "Ktor", "Clean Architecture", "Material Design", "GitHub Actions", "GitHub Pages"],
+    "maui-weather": [".NET MAUI", "Blazor", "MVVM", "Clean Architecture", "MapLibre", "Material Design", "xUnit", "bUnit", "GitHub Actions", "GitHub Pages"],
     "python-shark": ["NiceGUI", "Scapy", "pytest", "GitHub Actions"],
     "react-native-energy-insights": ["React Native", "Expo", "React Navigation", "TanStack Query", "Zustand", "Jest", "Maestro", "GitHub Actions"],
+    "react-native-weather": ["React Native", "Expo", "Zustand", "MapLibre", "Clean Architecture", "Material Design", "Jest", "GitHub Actions", "GitHub Pages"],
     "rust-monitor": ["ratatui", "Terminal UI", "NVML", "GitHub Actions"],
     "text-to-sql-evals": ["LLM Evals", "DuckDB", "Anthropic SDK", "Ollama", "Parquet", "pytest", "GitHub Actions"],
     "trivia-web-api": ["ASP.NET Core", "REST API"],
