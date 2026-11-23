@@ -1,8 +1,8 @@
 {
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
-  "updatedAt": "2026-11-21",
+  "updatedAt": "2026-11-22",
   "name": "Cale McCammon",
-  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, one weather app built six times in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other mobile apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
+  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, an offline-first Android weather app and the same app in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
     {
       "repo": "k2l",
@@ -15,19 +15,14 @@
       "links": []
     },
     {
-      "repo": "kmp-weather",
-      "summary": "A weather app in Kotlin Multiplatform with a map, place search and a weekly forecast. One Compose Multiplatform screen runs on Android, the desktop and the web. It is one of six builds of the same app; the others are in Flutter, React Native, .NET MAUI with Blazor, Ionic with Angular, and Vue with Capacitor.",
+      "repo": "android-weather",
+      "summary": "A native Android weather app in Kotlin and Jetpack Compose: a map, place search, saved places, a home-screen widget and notifications of severe weather. Forecasts are kept in Room and refreshed in the background by WorkManager, so the app opens on its last place with no connection. The same app is also built in six cross-platform frameworks, kmp-weather and flutter-weather among them.",
       "points": [
-        "Domain, data and UI are separate layers, and a test reads every source file's imports and fails on one that crosses them the wrong way.",
-        "State is held in two androidx ViewModels, each exposing one StateFlow. A search or forecast request that has been overtaken is cancelled, so an old answer cannot replace a newer one.",
-        "The view models hand the screen string resources, not text, so they are tested without Compose. The screen is tested by drawing it in a window that is never shown, and CI builds the Android, desktop and web apps."
+        "Room is the one source of truth. A fetched forecast is written to the database and never returned to the caller, so the screens, the Glance widget and the background worker all read the same rows and none has to be told when another has fetched.",
+        "The build is 16 Gradle modules whose shared settings live in convention plugins. A feature module depends on the domain and the shared UI only, so it cannot name Room, Retrofit or the other feature.",
+        "178 JVM tests include Compose tests of both screens and screenshot comparisons. Six more run the whole app on an emulator in CI against a stand-in weather server, with WorkManager's test driver running the scheduled refresh that Hilt builds."
       ],
-      "links": [
-        {
-          "label": "Live demo",
-          "url": "https://calemccammon.github.io/kmp-weather/"
-        }
-      ]
+      "links": []
     },
     {
       "repo": "data-engineer-crypto-streaming",
@@ -97,6 +92,12 @@
         "Hilt",
         "Coroutines",
         "Retrofit",
+        "Room",
+        "WorkManager",
+        "DataStore",
+        "Glance",
+        "Offline-First",
+        "Baseline Profiles",
         "Data Binding",
         "MVI",
         "Kotlin Multiplatform",
@@ -144,10 +145,11 @@
     },
     {
       "label": "Testing and delivery",
-      "tags": ["GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS", "pytest", "Jest", "Vitest", "xUnit", "bUnit", "Playwright", "Maestro", "Golden Tests"]
+      "tags": ["GitHub Actions", "GitHub Pages", "Docker", "Docker Compose", "Kubernetes", "Cloud Run", "AWS", "pytest", "Jest", "Vitest", "xUnit", "bUnit", "Playwright", "Maestro", "Robolectric", "Roborazzi", "Golden Tests"]
     }
   ],
   "techTags": {
+    "android-weather": ["Android", "Jetpack Compose", "Room", "WorkManager", "Hilt", "Offline-First", "Glance", "DataStore", "Retrofit", "Coroutines", "MapLibre", "MVVM", "Clean Architecture", "Material Design", "Baseline Profiles", "Robolectric", "Roborazzi", "GitHub Actions"],
     "apkloader": ["Swing", "ADB"],
     "capacitor-weather": ["Vue", "Capacitor", "Pinia", "MapLibre", "Clean Architecture", "Material Design", "Vite", "Vitest", "Playwright", "GitHub Actions", "GitHub Pages"],
     "contact-j2ee-aws": ["J2EE", "Tomcat", "MySQL", "AWS"],
