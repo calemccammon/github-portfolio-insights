@@ -7,9 +7,9 @@ it before changing the file.
 
 ## Who reads the page
 
-The page is linked from job applications. The reader is a recruiter or an engineer screening a
-candidate. They arrive from a résumé link, they have not seen any of the repositories, and they
-will give the page about a minute before deciding whether to open a project.
+The reader is usually an engineer who followed a link to the profile. They have not seen any of
+the repositories, and they will give the page about a minute before deciding whether to open a
+project.
 
 In that minute they want three things:
 
@@ -94,7 +94,7 @@ put the most identifying ones first.
 
 A tag is the name of a technology or technique that a reader might look for: a framework, a
 database, a protocol, a named pattern. Test each one by asking whether someone would search a
-résumé for it. "Kafka Streams" and "OAuth" pass. "Background Threads", "Score Tracking" and
+list of projects for it. "Kafka Streams" and "OAuth" pass. "Background Threads", "Score Tracking" and
 "Query Filtering" describe what the code does and do not pass.
 
 - Use one spelling for one thing across all repositories, so that the filter groups them: "REST
