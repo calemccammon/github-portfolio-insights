@@ -1,6 +1,6 @@
 {
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
-  "updatedAt": "2026-11-23",
+  "updatedAt": "2026-11-24",
   "name": "Cale McCammon",
   "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, an Android app whose screens an AI agent lays out, an Android weather app also built in six cross-platform frameworks, batch and streaming data pipelines, a text-to-SQL benchmark, and Flutter and React Native apps. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
@@ -30,7 +30,7 @@
       "points": [
         "The model never writes a number. It calls six typed tools that run fixed SQL, the agent stores each result in the screen's data model, and the model binds components to those paths. A layout that writes a figure itself or binds to a path that is not in the data is rejected and sent back once for correction.",
         "Every A2UI message is stored in Room as it arrives and the screen is drawn from what is stored, so a conversation comes back after a restart with the agent down. The Python and Kotlin halves are tested against the same catalog and against answer streams recorded from the agent.",
-        "Run against qwen3:8b on a laptop GPU, the model called the right tools for 47 of 50 questions, but only 1 answer passed the A2UI SDK's validation; the rest fell back to a plain message, so nothing broken reached the screen."
+        "Evaluated on 50 questions with qwen3:8b on a laptop GPU, no free-written layout passed the checks. Holding the layout to a JSON Schema built from the catalog and the fetched data, so a binding can only name a path that exists, raised that to 44 of 50; the remaining rejections and the faults still found in accepted layouts are listed in the README."
       ],
       "links": []
     },
@@ -132,7 +132,7 @@
     },
     {
       "label": "AI",
-      "tags": ["A2UI", "Generative UI", "Tool Calling", "LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API"]
+      "tags": ["A2UI", "Generative UI", "Tool Calling", "JSON Schema", "LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API"]
     },
     {
       "label": "Compilers and tools",
@@ -152,7 +152,7 @@
     "data-engineer-earthquake-pipeline": ["Airflow", "dbt", "PostgreSQL", "Metabase", "Docker Compose", "GitHub Actions", "GitHub Pages"],
     "data-engineer-finance-analytics": ["dbt", "Dagster", "DuckDB", "BigQuery", "Star Schema", "Evidence", "Gemini API", "Playwright", "pytest", "GitHub Actions", "GitHub Pages"],
     "data-engineer-wiki-streams": ["Kafka Streams", "Kafka", "Redpanda", "RocksDB", "Ktor", "Server-Sent Events", "OpenAPI", "GitHub Actions", "GitHub Pages"],
-    "finance-companion": ["Android", "Jetpack Compose", "A2UI", "Generative UI", "FastAPI", "Server-Sent Events", "Tool Calling", "Ollama", "OpenAI-compatible API", "LLM Evals", "DuckDB", "Hilt", "Room", "Offline-First", "Coroutines", "Material Design", "MVVM", "Robolectric", "Roborazzi", "pytest", "GitHub Actions"],
+    "finance-companion": ["Android", "Jetpack Compose", "A2UI", "Generative UI", "FastAPI", "Server-Sent Events", "Tool Calling", "JSON Schema", "Ollama", "OpenAI-compatible API", "LLM Evals", "DuckDB", "Hilt", "Room", "Offline-First", "Coroutines", "Material Design", "MVVM", "Robolectric", "Roborazzi", "pytest", "GitHub Actions"],
     "finance-analytics-java-springboot": ["Spring Boot", "BigQuery", "REST API", "OpenAPI", "Docker", "Kubernetes", "GitHub Actions", "GitHub Pages"],
     "flutter-freight-corridor": ["Flutter", "Riverpod", "GraphQL", "REST API", "go_router", "flutter_map", "GitHub Actions", "GitHub Pages"],
     "flutter-weather": ["Flutter", "Riverpod", "flutter_map", "Clean Architecture", "Material Design", "GitHub Actions", "GitHub Pages"],
