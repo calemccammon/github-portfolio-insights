@@ -1,8 +1,8 @@
 {
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
-  "updatedAt": "2026-11-22",
+  "updatedAt": "2026-11-23",
   "name": "Cale McCammon",
-  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, an offline-first Android weather app and the same app in six cross-platform frameworks, batch and streaming data pipelines, a benchmark for text-to-SQL models, and other apps in Flutter and React Native. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
+  "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, an Android app whose screens an AI agent lays out, an Android weather app also built in six cross-platform frameworks, batch and streaming data pipelines, a text-to-SQL benchmark, and Flutter and React Native apps. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
     {
       "repo": "k2l",
@@ -21,6 +21,16 @@
         "Room is the one source of truth. A fetched forecast is written to the database and never returned to the caller, so the screens, the Glance widget and the background worker all read the same rows and none has to be told when another has fetched.",
         "The build is 16 Gradle modules whose shared settings live in convention plugins. A feature module depends on the domain and the shared UI only, so it cannot name Room, Retrofit or the other feature.",
         "178 JVM tests include Compose tests of both screens and screenshot comparisons. Six more run the whole app on an emulator in CI against a stand-in weather server, with WorkManager's test driver running the scheduled refresh that Hilt builds."
+      ],
+      "links": []
+    },
+    {
+      "repo": "finance-companion",
+      "summary": "An Android app where you ask about ten US stocks and the economy, and an AI agent answers with a native Jetpack Compose screen of figures, charts and rankings. The agent, in Python with FastAPI, lays the screen out in the A2UI protocol and streams it over Server-Sent Events; the data comes from the dbt marts of data-engineer-finance-analytics.",
+      "points": [
+        "The model never writes a number. It calls six typed tools that run fixed SQL, the agent stores each result in the screen's data model, and the model binds components to those paths. A layout that writes a figure itself or binds to a path that is not in the data is rejected and sent back once for correction.",
+        "Every A2UI message is stored in Room as it arrives and the screen is drawn from what is stored, so a conversation comes back after a restart with the agent down. The Python and Kotlin halves are tested against the same catalog and against answer streams recorded from the agent.",
+        "Run against qwen3:8b on a laptop GPU, the model called the right tools for 47 of 50 questions, but only 1 answer passed the A2UI SDK's validation; the rest fell back to a plain message, so nothing broken reached the screen."
       ],
       "links": []
     },
@@ -58,21 +68,6 @@
           "url": "https://github.com/calemccammon/text-to-sql-evals/blob/main/REPORT.md"
         }
       ]
-    },
-    {
-      "repo": "flutter-freight-corridor",
-      "summary": "A Flutter app for Android and the web that shows live Finnish freight traffic: cargo trains from a GraphQL API, vessels and port calls from a REST API.",
-      "points": [
-        "The domain logic is a separate pure-Dart package with no Flutter imports. Both APIs sit behind one repository class, so the UI never handles GraphQL or HTTP types.",
-        "The rail and marine feeds share no identifier. The app joins them by pairing each train's final station with the nearest seaport that has port calls.",
-        "122 tests run with every external call mocked, and CI builds and deploys the web version."
-      ],
-      "links": [
-        {
-          "label": "Live demo",
-          "url": "https://calemccammon.github.io/flutter-freight-corridor/"
-        }
-      ]
     }
   ],
   "tagGroups": [
@@ -82,7 +77,7 @@
     },
     {
       "label": "Backend",
-      "tags": ["REST API", "GraphQL", "OpenAPI", "Spring Boot", "Ktor", "ASP.NET Core", "J2EE", "Tomcat", "OAuth", "Webhooks", "WebSockets", "Server-Sent Events", "Idempotency", "SSRF Defence"]
+      "tags": ["REST API", "GraphQL", "OpenAPI", "Spring Boot", "Ktor", "FastAPI", "ASP.NET Core", "J2EE", "Tomcat", "OAuth", "Webhooks", "WebSockets", "Server-Sent Events", "Idempotency", "SSRF Defence"]
     },
     {
       "label": "Mobile and UI",
@@ -137,7 +132,7 @@
     },
     {
       "label": "AI",
-      "tags": ["LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API"]
+      "tags": ["A2UI", "Generative UI", "Tool Calling", "LLM Evals", "Anthropic SDK", "Ollama", "Gemini API", "OpenAI-compatible API"]
     },
     {
       "label": "Compilers and tools",
@@ -157,6 +152,7 @@
     "data-engineer-earthquake-pipeline": ["Airflow", "dbt", "PostgreSQL", "Metabase", "Docker Compose", "GitHub Actions", "GitHub Pages"],
     "data-engineer-finance-analytics": ["dbt", "Dagster", "DuckDB", "BigQuery", "Star Schema", "Evidence", "Gemini API", "Playwright", "pytest", "GitHub Actions", "GitHub Pages"],
     "data-engineer-wiki-streams": ["Kafka Streams", "Kafka", "Redpanda", "RocksDB", "Ktor", "Server-Sent Events", "OpenAPI", "GitHub Actions", "GitHub Pages"],
+    "finance-companion": ["Android", "Jetpack Compose", "A2UI", "Generative UI", "FastAPI", "Server-Sent Events", "Tool Calling", "Ollama", "OpenAI-compatible API", "LLM Evals", "DuckDB", "Hilt", "Room", "Offline-First", "Coroutines", "Material Design", "MVVM", "Robolectric", "Roborazzi", "pytest", "GitHub Actions"],
     "finance-analytics-java-springboot": ["Spring Boot", "BigQuery", "REST API", "OpenAPI", "Docker", "Kubernetes", "GitHub Actions", "GitHub Pages"],
     "flutter-freight-corridor": ["Flutter", "Riverpod", "GraphQL", "REST API", "go_router", "flutter_map", "GitHub Actions", "GitHub Pages"],
     "flutter-weather": ["Flutter", "Riverpod", "flutter_map", "Clean Architecture", "Material Design", "GitHub Actions", "GitHub Pages"],
