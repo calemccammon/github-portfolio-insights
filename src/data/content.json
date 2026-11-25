@@ -30,7 +30,7 @@
       "points": [
         "The model never writes a number. It calls six typed tools that run fixed SQL, the agent stores each result in the screen's data model, and the model binds components to those paths. A layout that writes a figure itself or binds to a path that is not in the data is rejected and sent back once for correction.",
         "Every A2UI message is stored in Room as it arrives and the screen is drawn from what is stored, so a conversation comes back after a restart with the agent down. The Python and Kotlin halves are tested against the same catalog and against answer streams recorded from the agent.",
-        "Evaluated on 50 questions with qwen3:8b on a laptop GPU, 2 free-written layouts passed the checks. Holding the layout to a JSON Schema built from the catalog and the fetched data, so a binding can only name a path that exists and a price can only be drawn as currency, raised that to 39; the remaining rejections and the faults still found in accepted layouts are listed in the README."
+        "Evaluated on 50 questions with qwen3:8b on a laptop GPU, 4 free-written layouts passed the checks. Holding the layout to a JSON Schema built from the catalog and the fetched data, so a binding can only name a path that exists and each figure comes with its own label and format, raised that to 43. The README's demo is recorded with that local model."
       ],
       "links": []
     },
