@@ -1,6 +1,6 @@
 {
   "_comment": "Hand-maintained page content. Read src/data/README.md before editing: it says who reads the page, what each field is for, and how to check the result. `npm test` validates the structure.",
-  "updatedAt": "2026-11-24",
+  "updatedAt": "2026-11-25",
   "name": "Cale McCammon",
   "intro": "These are my public projects. The recent ones are a Kotlin-to-Lua compiler, a Go alerting service over Postgres, an Android app whose screens an AI agent lays out, an Android weather app also built in six cross-platform frameworks, batch and streaming data pipelines, a text-to-SQL benchmark, and Flutter and React Native apps. The older repositories, from 2018 on, are Android and Java.\n\nSix are described below. The rest are in the repository list at the bottom of the page.",
   "featured": [
@@ -30,7 +30,7 @@
       "points": [
         "The model never writes a number. It calls six typed tools that run fixed SQL, the agent stores each result in the screen's data model, and the model binds components to those paths. A layout that writes a figure itself or binds to a path that is not in the data is rejected and sent back once for correction.",
         "Every A2UI message is stored in Room as it arrives and the screen is drawn from what is stored, so a conversation comes back after a restart with the agent down. The Python and Kotlin halves are tested against the same catalog and against answer streams recorded from the agent.",
-        "Evaluated on 50 questions with qwen3:8b on a laptop GPU, no free-written layout passed the checks. Holding the layout to a JSON Schema built from the catalog and the fetched data, so a binding can only name a path that exists, raised that to 44 of 50; the remaining rejections and the faults still found in accepted layouts are listed in the README."
+        "Evaluated on 50 questions with qwen3:8b on a laptop GPU, 2 free-written layouts passed the checks. Holding the layout to a JSON Schema built from the catalog and the fetched data, so a binding can only name a path that exists and a price can only be drawn as currency, raised that to 39; the remaining rejections and the faults still found in accepted layouts are listed in the README."
       ],
       "links": []
     },
